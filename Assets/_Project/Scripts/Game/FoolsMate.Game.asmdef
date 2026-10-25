@@ -1,0 +1,18 @@
+{
+    "name": "FoolsMate.Game",
+    "rootNamespace": "FoolsMate.Game",
+    "references": [
+        "FoolsMate.Core",
+        "Unity.InputSystem",
+        "Unity.TextMeshPro"
+    ],
+    "includePlatforms": [],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": true,
+    "defineConstraints": [],
+    "versionDefines": [],
+    "noEngineReferences": false
+}
