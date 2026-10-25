@@ -2,7 +2,7 @@
 %TAG !u! tag:unity3d.com,2011:
 --- !u!78 &1
 TagManager:
-  serializedVersion: 2
+  serializedVersion: 3
   tags: []
   layers:
   - Default
@@ -41,3 +41,24 @@ TagManager:
   - name: Default
     uniqueID: 0
     locked: 0
+  - name: Board
+    uniqueID: 3476251707
+    locked: 0
+  - name: TileModifiers
+    uniqueID: 3140503239
+    locked: 0
+  - name: Pieces
+    uniqueID: 1280768425
+    locked: 0
+  - name: Previews
+    uniqueID: 3069055935
+    locked: 0
+  - name: Hand
+    uniqueID: 915604055
+    locked: 0
+  - name: UI
+    uniqueID: 1132421075
+    locked: 0
+  m_RenderingLayers:
+  - Default
+  m_MigratedRenderPipelines: []
