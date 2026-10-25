@@ -45,6 +45,9 @@
 # Visual Studio cache directory
 .vs/
 
+# macOS Finder metadata
+.DS_Store
+
 # Gradle cache directory
 .gradle/
 
