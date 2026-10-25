@@ -131,7 +131,7 @@ GameObject:
   - component: {fileID: 536777405}
   - component: {fileID: 536777404}
   m_Layer: 0
-  m_Name: TileModifers
+  m_Name: TileModifiers
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
