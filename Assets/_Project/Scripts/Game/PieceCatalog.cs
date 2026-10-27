@@ -60,6 +60,11 @@ namespace FoolsMate.Game
                     continue;
                 }
 
+                if (definition.WhiteSprite == null)
+                {
+                    Debug.LogWarning($"{name}: {definition.name} has no white sprite.", this);
+                }
+
                 if (string.IsNullOrEmpty(definition.Key))
                 {
                     Debug.LogWarning($"{name}: {definition.name} has no key.", this);

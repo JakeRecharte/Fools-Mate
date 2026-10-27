@@ -12,13 +12,11 @@ namespace FoolsMate.Game
     public class BoardView : MonoBehaviour
     {
         private const string SortingLayer = "Pieces";
+        private const int ColorOrder = 0;
+        private const int ShadeOrder = 1;
 
         [SerializeField] private Tilemap boardTilemap;
         [SerializeField] private PieceCatalog catalog;
-
-        [Header("Piece Tints")]
-        [SerializeField] private Color whiteColor = new Color(0.95f, 0.90f, 0.78f);
-        [SerializeField] private Color blackColor = new Color(0.45f, 0.28f, 0.62f);
 
         private readonly List<GameObject> pieceObjects = new List<GameObject>();
         private PieceColor playerColor;
@@ -31,18 +29,31 @@ namespace FoolsMate.Game
             foreach (Piece piece in board.Pieces)
             {
                 PieceColor color = board.GetColor(piece);
+                PieceDefinition definition = catalog.GetByKey(piece.DefinitionKey);
 
                 var pieceObject = new GameObject($"{color} {piece}");
                 pieceObject.transform.SetParent(transform, false);
                 pieceObject.transform.position = CellToWorld(board.GetCell(piece));
+                AddSprite(pieceObject, definition.GetSprite(color), ColorOrder);
 
-                var spriteRenderer = pieceObject.AddComponent<SpriteRenderer>();
-                spriteRenderer.sprite = catalog.GetByKey(piece.DefinitionKey).Sprite;
-                spriteRenderer.color = color == PieceColor.White ? whiteColor : blackColor;
-                spriteRenderer.sortingLayerName = SortingLayer;
+                // Shade is a child so it moves with the piece, and a higher order so it draws on top.
+                if (definition.ShadeSprite != null)
+                {
+                    var shadeObject = new GameObject("Shade");
+                    shadeObject.transform.SetParent(pieceObject.transform, false);
+                    AddSprite(shadeObject, definition.ShadeSprite, ShadeOrder);
+                }
 
                 pieceObjects.Add(pieceObject);
             }
+        }
+
+        private static void AddSprite(GameObject target, Sprite sprite, int sortingOrder)
+        {
+            var spriteRenderer = target.AddComponent<SpriteRenderer>();
+            spriteRenderer.sprite = sprite;
+            spriteRenderer.sortingLayerName = SortingLayer;
+            spriteRenderer.sortingOrder = sortingOrder;
         }
 
         /// <summary>World position of a cell's centre, rotated 180° when the player is black.</summary>

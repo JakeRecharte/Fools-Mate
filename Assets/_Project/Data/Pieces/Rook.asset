@@ -14,7 +14,9 @@ MonoBehaviour:
   m_EditorClassIdentifier: FoolsMate.Game::FoolsMate.Game.PieceDefinition
   key: piece_rook
   type: 3
-  sprite: {fileID: -5987583047349818080, guid: 2debfa1ad2f5d4f09bafea1f53a74f96, type: 3}
+  whiteSprite: {fileID: 21300000, guid: d37d1d76eb2874671ab80a3f5073da82, type: 3}
+  blackSprite: {fileID: 21300000, guid: d37d1d76eb2874671ab80a3f5073da82, type: 3}
+  shadeSprite: {fileID: 0}
   points: 5
   priority: 1
   damage: 1

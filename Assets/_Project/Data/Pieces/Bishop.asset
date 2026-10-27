@@ -14,7 +14,9 @@ MonoBehaviour:
   m_EditorClassIdentifier: FoolsMate.Game::FoolsMate.Game.PieceDefinition
   key: piece_bishop
   type: 4
-  sprite: {fileID: -5034484932296710172, guid: fb21ed58b3cc4c29bdf88dfc3b984fd9, type: 3}
+  whiteSprite: {fileID: -7084364140924410147, guid: 1cf5a7bbc43c146f4993af2d65235f43, type: 3}
+  blackSprite: {fileID: -178829486098858144, guid: 1cf5a7bbc43c146f4993af2d65235f43, type: 3}
+  shadeSprite: {fileID: -1780347195225049772, guid: 1cf5a7bbc43c146f4993af2d65235f43, type: 3}
   points: 3
   priority: 1
   damage: 1

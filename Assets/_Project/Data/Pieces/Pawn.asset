@@ -14,7 +14,9 @@ MonoBehaviour:
   m_EditorClassIdentifier: FoolsMate.Game::FoolsMate.Game.PieceDefinition
   key: piece_pawn
   type: 6
-  sprite: {fileID: 1064255246017747443, guid: b15990b3b782429681d70a6005db478e, type: 3}
+  whiteSprite: {fileID: -751118245585990429, guid: b8312134cb1c74fd2af0e5a056b77b3d, type: 3}
+  blackSprite: {fileID: 3033570258814489844, guid: b8312134cb1c74fd2af0e5a056b77b3d, type: 3}
+  shadeSprite: {fileID: 7509743165584058009, guid: b8312134cb1c74fd2af0e5a056b77b3d, type: 3}
   points: 1
   priority: 1
   damage: 1
