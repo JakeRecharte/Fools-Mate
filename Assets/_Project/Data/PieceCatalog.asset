@@ -1,0 +1,21 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 43193637361945818c7c6c4dc06e4f3c, type: 3}
+  m_Name: PieceCatalog
+  m_EditorClassIdentifier: FoolsMate.Game::FoolsMate.Game.PieceCatalog
+  definitions:
+  - {fileID: 11400000, guid: b09780a887ca54e32ac03c7ffef15630, type: 2}
+  - {fileID: 11400000, guid: 4eb1673161f474b968ed7301f88726aa, type: 2}
+  - {fileID: 11400000, guid: d295916609d274ee6af32d091c0aff3e, type: 2}
+  - {fileID: 11400000, guid: 7b47b5f269a4d4baf9cc11e640c1b84a, type: 2}
+  - {fileID: 11400000, guid: af0694b71dc7d4a83bb8c4ff59f91408, type: 2}
+  - {fileID: 11400000, guid: bc1de5f213a874f75bda86c4b2c28a98, type: 2}
