@@ -24,7 +24,7 @@ Style:
 
 - 640x360 pixel graphics
 - Mostly deep purple (instead of black) and cream (for white pieces)
-- The player plays black (purple); the enemy plays white (cream)
+- Piece colors follow standard chess: black pieces are purple, white pieces are cream. Since the player's color is rolled each round (see Color Roll), the player's pieces are sometimes purple and sometimes cream
 - Accent colors for menus, piece variants, etc.
 
 Assets:
@@ -75,9 +75,16 @@ Kings:
 - Your King is on the board and has 1 Health, like any other piece.
 - **Lives** are a separate stat set by your King choice. You lose a life each time your King is taken or you fail to pay the Levy. Losing a life ends the round and you move on to the next one. Points earned in that round still count toward the shop. Losing all lives ends the run.
 
+Color Roll:
+
+- At the start of each round, the player is randomly assigned white or black. The enemy plays the other color.
+- The board is always shown from the player's side: the player's pieces start at the bottom of the screen. When the player is black, the board is rotated 180°, as in chess apps.
+- Since moves resolve at the same time, white has no first-move advantage. What changes is the layout: as in standard chess, both queens start on the d-file, so from the player's view the queen is left of the King when playing white and right of the King when playing black.
+- Anything the player owns that sits on a square (tile modifiers, custom starting layouts) is stored from the player's point of view and placed on the real board at the start of each round (see Tiles).
+
 Turn structure:
 
-1. The enemy (white) telegraphs its moves.
+1. The enemy telegraphs its moves.
 2. You spend energy to queue your moves, either dodging or sacrificing pieces against the telegraphed attacks.
 3. Press MOVE. Your moves and the enemy's moves go off at the same time.
 
@@ -150,6 +157,8 @@ A shared event used by multiple mechanics (collisions, tiles, bosses, etc.):
   - Damage
   - Health
   - Double Points: the piece earns double points from pieces it captures
+- Upgrades belong to the piece, not to a square, so they carry over unchanged when the color roll flips the board.
+- Piece storage (later addition): a bin of extra pieces bought from the shop. Between rounds, the player can swap pieces from the bin into their starting army.
 
 **Tiles**
 
@@ -159,6 +168,11 @@ A shared event used by multiple mechanics (collisions, tiles, bosses, etc.):
   - Damage each turn a piece stays on it
   - Missing tile (hole in the board)
   - Damage buff when exiting the tile
+- Placement after a color roll. When the board flips, each tile modifier has to land somewhere:
+  - **A. Follows the piece (default):** the tile keeps the same file and its rank is flipped, so it stays under the same starting piece. A tile under your queen stays under your queen.
+  - **B. Stays where it was on screen (possibility):** the tile rotates 180° with the board. It stays on the player's side in the same screen position, but on the d- and e-files it ends up under the King instead of the queen.
+  - **C. Stays on its real square (possibility):** the tile doesn't move, so after a flip your modifiers are on the enemy's side and buff them. Better as a deliberate gamble than a default, for example a cheap but powerful "unstable" modifier, or a boss twist for the "the board itself" fight.
+  - Each modifier could carry its own placement rule, so A and C can exist side by side.
 
 **Die/Win**
 
@@ -180,6 +194,10 @@ Repeat:
   - Game rules (board state, move resolution, scoring, enemy logic) live in plain C# classes that don't depend on Unity scenes or GameObjects.
   - Unity scripts (MonoBehaviours, Tilemap, UI) only display the board state and pass player input to the rules.
   - Game data (Kings, pieces, upgrades, tiles) lives in ScriptableObjects, so new content is made in the Inspector instead of in code.
+  - Game rules use real chess colors and squares (a1 is always a1). Only the display knows about the 180° flip, through one conversion between squares and screen positions.
+  - Two levels of state:
+    - Run (kept between rounds): each piece is a unique object with its own ID, type or variant, stats, and upgrades, but no color or square. Tile modifiers are stored with their ID, placement rule, and a position from the player's point of view.
+    - Round (rebuilt each round): the color is rolled and the army is placed on real squares. The board holds a piece grid of piece IDs and a modifier grid of modifier IDs.
   - This lets move resolution be unit tested with the Unity Test Framework without running the game.
 
 **Testing**
@@ -196,6 +214,8 @@ Repeat:
 - Boss King Health for each tier
 - The 4 piece variants
 - More Kings
+- Piece storage bin: capacity, shop pricing, when swaps are allowed
+- Which tile modifiers (if any) use placement B or C
 
 **Concerns**
 
