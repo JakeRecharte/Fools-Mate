@@ -25,6 +25,7 @@ Style:
 - 640x360 pixel graphics
 - Mostly deep purple (instead of black) and cream (for white pieces)
 - Piece colors follow standard chess: black pieces are purple, white pieces are cream. Since the player's color is rolled each round (see Color Roll), the player's pieces are sometimes purple and sometimes cream
+- Each piece has separate white and black sprites, drawn as-is rather than tinted in code
 - Accent colors for menus, piece variants, etc.
 
 Assets:
@@ -33,7 +34,8 @@ Assets:
 - Animation when you click and drag a piece that shows a hand grabbing it (either full size or a mini cartoony hand)
 - HUD/UI: simple, mostly information based
 - Move preview: before pressing MOVE, show ghost paths for queued moves, the enemy's telegraphed attacks, and markers on squares where pieces will collide
-- Reserved-square marker: an outline of your piece on the square it is moving into
+- Planned-move marker: an outline of your piece on the square it is moving into
+- Move Check warnings: shown when MOVE is blocked (a destination held by your own piece that isn't moving, or a King left in check)
 - Shop/upgrades page
 - Boss pieces
 - Alternate board tiles, including tile modifiers (see Tiles)
@@ -85,10 +87,27 @@ Color Roll:
 Turn structure:
 
 1. The enemy telegraphs its moves.
-2. You spend energy to queue your moves, either dodging or sacrificing pieces against the telegraphed attacks.
-3. Press MOVE. Your moves and the enemy's moves go off at the same time.
+2. You plan your moves, either dodging or sacrificing pieces against the telegraphed attacks.
+3. Press MOVE. Your plan is checked (see Move Check), then your moves and the enemy's moves go off at the same time.
 
 - Energy: moving one piece costs 1 energy.
+
+Planning:
+
+- Click a piece, then a destination. The destination is marked on the board with an outline of the piece. Nothing is checked yet.
+- Each piece gets one move per turn. Planning a new destination for a piece replaces its old one. To cancel a planned move, select the piece and click it again (it stays put this turn); right-click also works.
+- You can't plan more moves than you have energy for. The HUD shows energy used (e.g. 2/2).
+- Your own pieces count as targets while planning, since they may move out of the way (see Move Check).
+
+Move Check (when MOVE is pressed):
+
+- For each planned destination:
+  - **Empty cell:** fine.
+  - **An enemy piece is there:** fine. It's an attack, handled by Move Resolution.
+  - **One of your pieces is there:** fine only if that piece is also moving this turn. If it isn't, show a warning and block MOVE until the plan is changed.
+- **Sliding paths:** a sliding piece's path may only cross pieces that are moving away this turn (see Blocking). Since planning can show cells past your own planned movers, cancelling one of those moves can make another plan invalid, so this is checked again at MOVE.
+- **Check:** if your King is in check, the plan must get it out of check, and no planned move may put it into check. Otherwise show a warning and block MOVE.
+- Two of your own pieces planned to the same cell is allowed (see Move Resolution, Friendly collision).
 - Not all enemy moves are telegraphed.
 - Board: standard 8x8 to start.
 - Standard chess rules apply: castling, en passant, pawn promotion, and check. If your King is in check you must respond to it, and you can't move into check. Only telegraphed attacks put your King in check. Untelegraphed attacks can take your King without warning, which keeps an element of real chess.
@@ -135,13 +154,16 @@ When MOVE is pressed:
   5. If Priority is tied in steps 3 or 4, both pieces die and no points are awarded.
 - **Swap** (two pieces move into each other's squares): they pass through each other and swap squares, nothing else happens. Playtest this as a mechanic.
 - **Dodge**: a piece that leaves a square that was being attacked dodges the attack.
-- **Blocking**: sliding pieces (Bishop, Rook, Queen) are blocked by any piece on their path at the start of the turn, even if that piece is moving away.
-- **Reserved squares**: a square one of your pieces is moving into is marked with that piece's outline, and none of your other pieces can move into it. The enemy's telegraphed destinations do not block your pieces.
+- **Blocking**: sliding pieces (Bishop, Rook, Queen) are blocked by pieces on their path at the start of the turn, except pieces that are moving away this turn, which they pass through.
+- **Friendly collision** (two of your own pieces planned to the same cell): the higher-Priority piece takes the cell and the other is Bounced. If Priority is tied, both are Bounced. A deliberate risk for extra play and chance.
+- **Planned-move markers**: a cell one of your pieces is moving into is marked with that piece's outline. The enemy's telegraphed destinations do not block your pieces.
 
 **Bounce**
 A shared event used by multiple mechanics (collisions, tiles, bosses, etc.):
 
 - The piece moves to a random unoccupied square within 2 tiles.
+- "Within 2 tiles" is the 5x5 square around the cell the piece tried to enter (diagonals count, like a King's reach), not the cell it came from. The piece never lands back on that cell, even if it's empty (e.g. after a tied friendly collision).
+- Bounces happen after every other move has landed, so "unoccupied" means unoccupied on the final board.
 - If there is no unoccupied square within 2 tiles, the piece dies.
 
 **Enemy**
@@ -216,6 +238,7 @@ Repeat:
 - More Kings
 - Piece storage bin: capacity, shop pricing, when swaps are allowed
 - Which tile modifiers (if any) use placement B or C
+- Blocking pass-through for enemy pieces: does a sliding piece pass through an enemy that's moving away, including untelegraphed moves the player couldn't see?
 
 **Concerns**
 

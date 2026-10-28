@@ -1,0 +1,23 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: bb2d40e7130ed4323b83fbabf464062a, type: 3}
+  m_Name: Queen
+  m_EditorClassIdentifier: FoolsMate.Game::FoolsMate.Game.PieceDefinition
+  key: piece_queen
+  type: 2
+  whiteSprite: {fileID: 9004350585163237882, guid: a76547c7a0c3b49b98e64271ecd3097b, type: 3}
+  blackSprite: {fileID: -4325852281962052854, guid: a76547c7a0c3b49b98e64271ecd3097b, type: 3}
+  shadeSprite: {fileID: -4669538335794888440, guid: a76547c7a0c3b49b98e64271ecd3097b, type: 3}
+  points: 9
+  priority: 1
+  damage: 1
+  health: 1

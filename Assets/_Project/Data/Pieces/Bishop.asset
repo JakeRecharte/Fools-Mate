@@ -1,0 +1,23 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: bb2d40e7130ed4323b83fbabf464062a, type: 3}
+  m_Name: Bishop
+  m_EditorClassIdentifier: FoolsMate.Game::FoolsMate.Game.PieceDefinition
+  key: piece_bishop
+  type: 4
+  whiteSprite: {fileID: -7084364140924410147, guid: 1cf5a7bbc43c146f4993af2d65235f43, type: 3}
+  blackSprite: {fileID: -178829486098858144, guid: 1cf5a7bbc43c146f4993af2d65235f43, type: 3}
+  shadeSprite: {fileID: -1780347195225049772, guid: 1cf5a7bbc43c146f4993af2d65235f43, type: 3}
+  points: 3
+  priority: 1
+  damage: 1
+  health: 1
