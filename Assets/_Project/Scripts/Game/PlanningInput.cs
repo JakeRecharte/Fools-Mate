@@ -42,6 +42,14 @@ namespace FoolsMate.Game
             RefreshPlan();
         }
 
+        /// <summary>Called by <see cref="TurnController"/> when the round ends. Clicks do nothing until the next Begin.</summary>
+        public void End()
+        {
+            Deselect();
+            boardView.ClearPlan();
+            board = null;
+        }
+
         private void Update()
         {
             Mouse mouse = Mouse.current;
