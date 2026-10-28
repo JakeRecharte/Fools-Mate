@@ -20,9 +20,17 @@ namespace FoolsMate.Game
         [SerializeField] private StartingLayout playerLayout;
         [SerializeField] private StartingLayout enemyLayout;
         [SerializeField] private BoardView boardView;
+        [SerializeField] private TurnController turnController;
 
         [Tooltip("Force a color for testing. Random is the real game rule.")]
         [SerializeField] private ColorChoice playerColor = ColorChoice.Random;
+
+        [Tooltip("Moves the player can plan each turn. Level 1 is 2.")]
+        [Min(0)]
+        [SerializeField] private int energyPerTurn = 2;
+
+        [Tooltip("0 picks a new seed each round. Set a number to replay the same Bounces while testing.")]
+        [SerializeField] private int randomSeed;
 
         private BoardState board;
 
@@ -44,8 +52,12 @@ namespace FoolsMate.Game
             board.PlaceArmy(playerArmy, rolledColor);
             board.PlaceArmy(enemyArmy, rolledColor.Opposite());
 
+            // Core rules use System.Random, since Core can't see Unity. Logged so a strange round can be replayed.
+            int seed = randomSeed != 0 ? randomSeed : Random.Range(1, int.MaxValue);
+            Debug.Log($"Round start: player is {rolledColor}, seed {seed}.", this);
+
             boardView.Show(board, rolledColor);
-            Debug.Log($"Round start: player is {rolledColor}.", this);
+            turnController.Begin(board, boardView, rolledColor, energyPerTurn, new System.Random(seed));
         }
 
         private PieceColor RollPlayerColor()
@@ -86,6 +98,12 @@ namespace FoolsMate.Game
             if (boardView == null)
             {
                 Debug.LogError("RoundSetup: Board View isn't assigned.", this);
+                ok = false;
+            }
+
+            if (turnController == null)
+            {
+                Debug.LogError("RoundSetup: Turn Controller isn't assigned.", this);
                 ok = false;
             }
 
