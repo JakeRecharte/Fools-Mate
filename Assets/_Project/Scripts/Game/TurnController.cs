@@ -17,6 +17,9 @@ namespace FoolsMate.Game
         [SerializeField] private Button moveButton;
         [SerializeField] private TMP_Text warningText;
 
+        [Tooltip("Optional. Shows kills, points, the turn, and the Round Over panel.")]
+        [SerializeField] private RoundHud hud;
+
         private BoardState board;
         private BoardView boardView;
         private PieceColor playerColor;
@@ -46,6 +49,7 @@ namespace FoolsMate.Game
                 moveButton.interactable = true;
             }
 
+            RefreshHud();
             StartNextTurn();
         }
 
@@ -67,9 +71,22 @@ namespace FoolsMate.Game
 
             Debug.Log($"Round over: {DescribeOutcome(score.Outcome)} Kills {score.Kills}/{score.Tribute}, " +
                 $"Points {score.Points}.", this);
+
+            if (hud != null)
+            {
+                hud.ShowOutcome(score.Outcome);
+            }
         }
 
-        private static string DescribeOutcome(RoundOutcome outcome)
+        private void RefreshHud()
+        {
+            if (hud != null)
+            {
+                hud.Refresh(score);
+            }
+        }
+
+        public static string DescribeOutcome(RoundOutcome outcome)
         {
             switch (outcome)
             {
@@ -129,6 +146,7 @@ namespace FoolsMate.Game
             LogEvents(events);
 
             score.ApplyTurn(events);
+            RefreshHud();
             Debug.Log($"Kills {score.Kills}/{score.Tribute} · Points {score.Points} · " +
                 $"Turn {score.TurnsTaken}/{score.TurnLimit}", this);
 
