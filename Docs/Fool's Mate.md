@@ -95,7 +95,7 @@ Turn structure:
 Planning:
 
 - Click a piece, then a destination. The destination is marked on the board with an outline of the piece. Nothing is checked yet.
-- Each piece gets one move per turn. Planning a new destination for a piece replaces its old one, and a planned move can be cancelled.
+- Each piece gets one move per turn. Planning a new destination for a piece replaces its old one. To cancel a planned move, select the piece and click it again (it stays put this turn); right-click also works.
 - You can't plan more moves than you have energy for. The HUD shows energy used (e.g. 2/2).
 - Your own pieces count as targets while planning, since they may move out of the way (see Move Check).
 
@@ -155,13 +155,15 @@ When MOVE is pressed:
 - **Swap** (two pieces move into each other's squares): they pass through each other and swap squares, nothing else happens. Playtest this as a mechanic.
 - **Dodge**: a piece that leaves a square that was being attacked dodges the attack.
 - **Blocking**: sliding pieces (Bishop, Rook, Queen) are blocked by pieces on their path at the start of the turn, except pieces that are moving away this turn, which they pass through.
-- **Friendly collision** (two of your own pieces planned to the same cell): the higher-Priority piece takes the cell and the other is Bounced. A deliberate risk for extra play and chance.
+- **Friendly collision** (two of your own pieces planned to the same cell): the higher-Priority piece takes the cell and the other is Bounced. If Priority is tied, both are Bounced. A deliberate risk for extra play and chance.
 - **Planned-move markers**: a cell one of your pieces is moving into is marked with that piece's outline. The enemy's telegraphed destinations do not block your pieces.
 
 **Bounce**
 A shared event used by multiple mechanics (collisions, tiles, bosses, etc.):
 
 - The piece moves to a random unoccupied square within 2 tiles.
+- "Within 2 tiles" is the 5x5 square around the cell the piece tried to enter (diagonals count, like a King's reach), not the cell it came from. The piece never lands back on that cell, even if it's empty (e.g. after a tied friendly collision).
+- Bounces happen after every other move has landed, so "unoccupied" means unoccupied on the final board.
 - If there is no unoccupied square within 2 tiles, the piece dies.
 
 **Enemy**
@@ -236,7 +238,6 @@ Repeat:
 - More Kings
 - Piece storage bin: capacity, shop pricing, when swaps are allowed
 - Which tile modifiers (if any) use placement B or C
-- Friendly collision with tied Priority: both Bounced, or something else?
 - Blocking pass-through for enemy pieces: does a sliding piece pass through an enemy that's moving away, including untelegraphed moves the player couldn't see?
 
 **Concerns**

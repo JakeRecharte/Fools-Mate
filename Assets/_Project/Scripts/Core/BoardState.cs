@@ -58,6 +58,76 @@ namespace FoolsMate.Core
             placed.Add(piece.Id, new PlacedPiece(piece, color, cell));
         }
 
+        /// <summary>
+        /// Takes a piece off the grid for the moment but keeps it on the board, so moves can resolve at the
+        /// same time. Its <see cref="GetCell"/> stays at the cell it left until it lands.
+        /// </summary>
+        public void Lift(Piece piece)
+        {
+            PlacedPiece entry = Find(piece);
+            Cell cell = entry.Cell;
+
+            // Only clear the cell if it's still ours, so lifting twice can't wipe out a piece that landed there.
+            if (pieceIds[cell.File, cell.Rank] == piece.Id)
+            {
+                pieceIds[cell.File, cell.Rank] = Empty;
+            }
+        }
+
+        /// <summary>Puts a piece already on this board onto a cell, usually after <see cref="Lift"/>.</summary>
+        public void Land(Piece piece, Cell cell)
+        {
+            PlacedPiece entry = Find(piece);
+
+            if (!cell.IsOnBoard)
+            {
+                throw new ArgumentOutOfRangeException(nameof(cell), $"{cell} is off the board.");
+            }
+
+            int occupantId = pieceIds[cell.File, cell.Rank];
+            if (occupantId != Empty && occupantId != piece.Id)
+            {
+                throw new InvalidOperationException($"{cell} is already taken by {GetPieceAt(cell)}.");
+            }
+
+            // Clear the old cell in case the piece wasn't lifted first.
+            Cell oldCell = entry.Cell;
+            if (pieceIds[oldCell.File, oldCell.Rank] == piece.Id)
+            {
+                pieceIds[oldCell.File, oldCell.Rank] = Empty;
+            }
+
+            pieceIds[cell.File, cell.Rank] = piece.Id;
+            entry.Cell = cell;
+        }
+
+        /// <summary>Lowers a piece's Health, never below 0. Returns true if its Health is now 0.</summary>
+        public bool TakeDamage(Piece piece, int amount)
+        {
+            if (amount < 0)
+            {
+                throw new ArgumentOutOfRangeException(nameof(amount), "Damage can't be negative.");
+            }
+
+            PlacedPiece entry = Find(piece);
+            entry.CurrentHealth = Math.Max(0, entry.CurrentHealth - amount);
+            return entry.CurrentHealth == 0;
+        }
+
+        /// <summary>Takes a piece off the board for good, e.g. when it's captured or dies.</summary>
+        public void Remove(Piece piece)
+        {
+            PlacedPiece entry = Find(piece);
+            Cell cell = entry.Cell;
+
+            if (pieceIds[cell.File, cell.Rank] == piece.Id)
+            {
+                pieceIds[cell.File, cell.Rank] = Empty;
+            }
+
+            placed.Remove(piece.Id);
+        }
+
         /// <summary>Returns the piece on the cell, or null if the cell is empty or off the board.</summary>
         public Piece GetPieceAt(Cell cell)
         {
