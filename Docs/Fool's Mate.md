@@ -6,8 +6,8 @@
 
 - Fool's Mate is a Balatro-inspired chess roguelike.
 - YOU select your King, each with their own unique board and pieces, and fight through a series of opponents, upgrading your board and pieces with modifiers, or downright swapping them out.
-- Collect points as you take down your opponent's pieces, just be sure to pay the Levy before you run out of turns.
-- Spend points in the shop on match buffs and piece upgrades that turn the tide in your favor.
+- Take down enough of your opponent's pieces to pay the Tribute before you run out of turns.
+- Every capture also earns points, and the bigger the piece, the more it's worth. Spend points in the shop on match buffs and piece upgrades that turn the tide in your favor.
 - Fight Boss enemies with their own twist: capture guarded fortresses, find your way through the fog of war, or even battle the board itself.
 
 **Controls**
@@ -48,7 +48,7 @@ Styling:
 Assets:
 
 - Piece moving: a deep clunk
-- Piece fighting/capturing: deep crumbling noise, followed by a ching to mark a point score
+- Piece fighting/capturing: deep crumbling noise, followed by a ching to mark the points earned
 - Menu: clicking on chess pieces, menu/settings navigation, shop/purchase noise
 
 Sourcing:
@@ -75,7 +75,7 @@ Kings:
 | Baron | 1 | Regular board, but the outermost pawns (a- and h-file) are upgraded to Knights |
 
 - Your King is on the board and has 1 Health, like any other piece.
-- **Lives** are a separate stat set by your King choice. You lose a life each time your King is taken or you fail to pay the Levy. Losing a life ends the round and you move on to the next one. Points earned in that round still count toward the shop. Losing all lives ends the run.
+- **Lives** are a separate stat set by your King choice. You lose a life each time your King is taken or you fail to pay the Tribute. Losing a life ends the round and you move on to the next one. Points earned in that round still count toward the shop. Losing all lives ends the run.
 
 Color Roll:
 
@@ -115,21 +115,27 @@ Move Check (when MOVE is pressed):
 Round goal:
 
 - Win a round by either:
-  - paying the **Levy** (earning the round's point target) within the turn limit, or
+  - paying the **Tribute** (capturing the round's target number of enemy pieces) within the turn limit, or
   - capturing the enemy King.
-- If the turn limit runs out before the Levy is paid, you lose a life and move on to the next round.
+- If the turn limit runs out before the Tribute is paid, you lose a life and move on to the next round.
+- The round ends at the end of the turn the Tribute is paid. If your King is lost on that same turn, the lost life wins out.
+- Your King leaving the board for any reason (captured, or a Bounce with no room) costs a life.
+- **Kills vs points:** the Tribute counts kills, and every piece counts as one kill. Points are only currency for the shop. This splits winning from earning, the way Balatro splits chips from money: picking off pawns is the safe way to pay the Tribute, but leaves you poorer in the shop, while hunting the Queen and Rooks pays more but is riskier.
+- Only your captures count as kills. An enemy that dies with nobody responsible (e.g. a Bounce with no room) doesn't count and earns no points.
 - Enemy Kings have 1 Health in regular rounds. Boss Kings are sturdier (Health TBD).
 
 Level 1 (playtest target, tune this first):
 
-| Levy | Turn limit | Energy per turn |
+| Tribute | Turn limit | Energy per turn |
 |---|---|---|
-| 10 points | 5 turns | 2 |
+| 4 kills | 5 turns | 2 |
+
+The 4-kill Tribute is a first guess to tune in playtesting.
 
 Piece stats:
 
 - Every piece has **Priority**, **Damage**, and **Health**.
-- Points per capture use official chess piece values to start:
+- Points per capture (shop currency, not the Tribute) use official chess piece values to start:
 
 | Piece | Points | Priority | Damage | Health |
 |---|---|---|---|---|
@@ -172,13 +178,13 @@ A shared event used by multiple mechanics (collisions, tiles, bosses, etc.):
 
 **Upgrade**
 
-- Currency: points are the only currency.
+- Currency: points are the only currency. They're earned from captures and don't count toward the Tribute.
 - Shop: use your captured points to buy piece upgrades from whatever the shop has in stock, or to upgrade tiles.
 - Piece upgrades modify:
   - Priority
   - Damage
   - Health
-  - Double Points: the piece earns double points from pieces it captures
+  - Double Points: the piece earns double points from pieces it captures (money only, not kills)
 - Upgrades belong to the piece, not to a square, so they carry over unchanged when the color roll flips the board.
 - Piece storage (later addition): a bin of extra pieces bought from the shop. Between rounds, the player can swap pieces from the bin into their starting army.
 
@@ -231,7 +237,8 @@ Repeat:
 
 - Shop: stock size, prices, rerolls
 - Piece stats: Priority, Damage, Health for each piece
-- Levy and turn limit for rounds after Level 1, and how energy grows
+- Tribute and turn limit for rounds after Level 1, and how energy grows
+- Tribute scaling: the enemy army is limited (15 pieces besides the King), so later rounds can't just raise the kill count. Options: tighter turn limits, sturdier enemy pieces, enemy reinforcements
 - 4th boss twist
 - Boss King Health for each tier
 - The 4 piece variants
