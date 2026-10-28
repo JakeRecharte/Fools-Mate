@@ -29,6 +29,14 @@ namespace FoolsMate.Game
         [Min(0)]
         [SerializeField] private int energyPerTurn = 2;
 
+        [Tooltip("Enemy pieces to capture to win the round. Level 1 is 4.")]
+        [Min(1)]
+        [SerializeField] private int tribute = 4;
+
+        [Tooltip("Turns to pay the Tribute before losing a life. Level 1 is 5.")]
+        [Min(1)]
+        [SerializeField] private int turnLimit = 5;
+
         [Tooltip("0 picks a new seed each round. Set a number to replay the same Bounces while testing.")]
         [SerializeField] private int randomSeed;
 
@@ -56,8 +64,10 @@ namespace FoolsMate.Game
             int seed = randomSeed != 0 ? randomSeed : Random.Range(1, int.MaxValue);
             Debug.Log($"Round start: player is {rolledColor}, seed {seed}.", this);
 
+            var score = new RoundScore(rolledColor, tribute, turnLimit);
+
             boardView.Show(board, rolledColor);
-            turnController.Begin(board, boardView, rolledColor, energyPerTurn, new System.Random(seed));
+            turnController.Begin(board, boardView, rolledColor, energyPerTurn, new System.Random(seed), score);
         }
 
         private PieceColor RollPlayerColor()

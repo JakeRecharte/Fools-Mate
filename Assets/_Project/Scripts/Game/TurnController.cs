@@ -8,8 +8,8 @@ using UnityEngine.UI;
 namespace FoolsMate.Game
 {
     /// <summary>
-    /// Runs the turn loop: planning, the Move Check when MOVE is pressed, then resolution, a redraw, and the
-    /// next turn's planning.
+    /// Runs the turn loop: planning, the Move Check when MOVE is pressed, then resolution, scoring, a redraw,
+    /// and either the next turn's planning or the end of the round.
     /// </summary>
     public class TurnController : MonoBehaviour
     {
@@ -22,30 +22,68 @@ namespace FoolsMate.Game
         private PieceColor playerColor;
         private int energy;
         private System.Random random;
-        private int turn;
+        private RoundScore score;
+
+        /// <summary>The turn being planned, counting from 1.</summary>
+        private int Turn => score.TurnsTaken + 1;
 
         /// <summary>
         /// Called by <see cref="RoundSetup"/> once the round's board exists. The random source is shared for the
         /// whole round so one seed replays every Bounce.
         /// </summary>
         public void Begin(BoardState board, BoardView boardView, PieceColor playerColor, int energy,
-            System.Random random)
+            System.Random random, RoundScore score)
         {
             this.board = board;
             this.boardView = boardView;
             this.playerColor = playerColor;
             this.energy = energy;
             this.random = random;
-            turn = 0;
+            this.score = score;
+
+            if (moveButton != null)
+            {
+                moveButton.interactable = true;
+            }
+
             StartNextTurn();
         }
 
         private void StartNextTurn()
         {
-            turn++;
             planningInput.Begin(board, playerColor, energy);
             ClearWarnings();
-            Debug.Log($"Turn {turn}: plan your moves.", this);
+            Debug.Log($"Turn {Turn}/{score.TurnLimit}: plan your moves.", this);
+        }
+
+        private void EndRound()
+        {
+            planningInput.End();
+
+            if (moveButton != null)
+            {
+                moveButton.interactable = false;
+            }
+
+            Debug.Log($"Round over: {DescribeOutcome(score.Outcome)} Kills {score.Kills}/{score.Tribute}, " +
+                $"Points {score.Points}.", this);
+        }
+
+        private static string DescribeOutcome(RoundOutcome outcome)
+        {
+            switch (outcome)
+            {
+                case RoundOutcome.TributePaid:
+                    return "Tribute paid!";
+                case RoundOutcome.KingCaptured:
+                    return "Enemy King captured!";
+                case RoundOutcome.OutOfTurns:
+                    return "Out of turns. You lose a life.";
+                case RoundOutcome.KingLost:
+                    return "Your King fell. You lose a life.";
+                default:
+                    return outcome.ToString();
+            }
         }
 
         private void Awake()
@@ -72,7 +110,7 @@ namespace FoolsMate.Game
 
         private void OnMovePressed()
         {
-            if (board == null)
+            if (board == null || score.IsOver)
             {
                 return;
             }
@@ -86,22 +124,35 @@ namespace FoolsMate.Game
                 return;
             }
 
+            // Logged before ApplyTurn, which moves the turn counter on.
             List<ResolutionEvent> events = MoveResolver.Resolve(board, plan, random);
             LogEvents(events);
 
+            score.ApplyTurn(events);
+            Debug.Log($"Kills {score.Kills}/{score.Tribute} · Points {score.Points} · " +
+                $"Turn {score.TurnsTaken}/{score.TurnLimit}", this);
+
             boardView.Show(board, playerColor);
-            StartNextTurn();
+
+            if (score.IsOver)
+            {
+                EndRound();
+            }
+            else
+            {
+                StartNextTurn();
+            }
         }
 
         private void LogEvents(List<ResolutionEvent> events)
         {
             if (events.Count == 0)
             {
-                Debug.Log($"Turn {turn}: no moves.", this);
+                Debug.Log($"Turn {Turn}: no moves.", this);
                 return;
             }
 
-            Debug.Log($"Turn {turn}:\n" + string.Join("\n", events), this);
+            Debug.Log($"Turn {Turn}:\n" + string.Join("\n", events), this);
         }
 
         private void ShowWarnings(IEnumerable<string> messages)
