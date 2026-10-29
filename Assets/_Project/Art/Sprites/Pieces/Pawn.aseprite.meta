@@ -188,7 +188,7 @@ ScriptedImporter:
     edges: []
     tessellationDetail: 0
     uvTransform: {x: 4, y: 64}
-  - name: EnemyMarker
+  - name: EtherealPawnEnemy
     originalName: 
     pivot: {x: 0.5714286, y: 0.54545456}
     alignment: 9
@@ -200,7 +200,7 @@ ScriptedImporter:
       y: 4
       width: 21
       height: 22
-    spriteID: ac6ea18072521481da9065a0fd1e503b
+    spriteID: ab40490df056746fda01c430746c39cd
     spriteBone: []
     spriteOutline: []
     vertices: []
@@ -209,7 +209,7 @@ ScriptedImporter:
     edges: []
     tessellationDetail: 0
     uvTransform: {x: 4, y: 4}
-  - name: PlayerMarker Copy
+  - name: EtherealPawnPlayer
     originalName: 
     pivot: {x: 0.5714286, y: 0.54545456}
     alignment: 9
@@ -221,7 +221,7 @@ ScriptedImporter:
       y: 34
       width: 21
       height: 22
-    spriteID: 54a7d952fd987464c9f622f365d7025b
+    spriteID: a503f862f961a4456844342d0f7a4ea3
     spriteBone: []
     spriteOutline: []
     vertices: []
@@ -285,17 +285,17 @@ ScriptedImporter:
     parentIndex: -1
   - layerIndex: 2
     uuid:
-      value0: 3372927248
+      value0: 279145466
       value1: 0
       value2: 0
       value3: 0
     guid: 0
-    name: EnemyMarker
+    name: EtherealPawnEnemy
     layerFlags: 3
     layerType: 0
     blendMode: 0
     cells:
-    - name: EnemyMarker
+    - name: EtherealPawnEnemy
       frameIndex: 0
       additiveSortOrder: 0
       cellRect:
@@ -303,24 +303,24 @@ ScriptedImporter:
         y: 4
         width: 21
         height: 22
-      spriteId: ac6ea18072521481da9065a0fd1e503b
+      spriteId: ab40490df056746fda01c430746c39cd
     linkedCells: []
     tileCells: []
     tileSetIndex: 0
     parentIndex: -1
   - layerIndex: 3
     uuid:
-      value0: 3541442378
+      value0: 1376654097
       value1: 0
       value2: 0
       value3: 0
     guid: 0
-    name: PlayerMarker Copy
+    name: EtherealPawnPlayer
     layerFlags: 3
     layerType: 0
     blendMode: 0
     cells:
-    - name: PlayerMarker Copy
+    - name: EtherealPawnPlayer
       frameIndex: 0
       additiveSortOrder: 0
       cellRect:
@@ -328,7 +328,7 @@ ScriptedImporter:
         y: 4
         width: 21
         height: 22
-      spriteId: 54a7d952fd987464c9f622f365d7025b
+      spriteId: a503f862f961a4456844342d0f7a4ea3
     linkedCells: []
     tileCells: []
     tileSetIndex: 0

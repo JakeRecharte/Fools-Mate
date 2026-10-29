@@ -159,8 +159,9 @@ When MOVE is pressed:
      - Track 2 (to test): the higher-Priority piece takes the square and earns 1 point for taking it. The lower-Priority piece is Bounced.
   5. If Priority is tied in steps 3 or 4, both pieces die and no points are awarded.
 - **Swap** (two pieces move into each other's squares): they pass through each other and swap squares, nothing else happens. Playtest this as a mechanic.
+- **Leaving enemies**: you can't move onto an enemy's cell if it's telegraphed to move away. Without this, you could keep trading places with an enemy turn after turn. You can still move to its destination to meet it there.
 - **Dodge**: a piece that leaves a square that was being attacked dodges the attack.
-- **Blocking**: sliding pieces (Bishop, Rook, Queen) are blocked by pieces on their path at the start of the turn, except pieces that are moving away this turn, which they pass through.
+- **Blocking**: sliding pieces (Bishop, Rook, Queen) are blocked by pieces on their path at the start of the turn. They pass through your own pieces that are moving away this turn, but can't overtake them: a cell one of your own pieces is moving into blocks the path (you can still move onto it, as a friendly collision), unless that piece started behind on the same line and is just following. For example, a queen can't slide past the cell her pawn steps into, but a pawn can double-step while the rook behind it moves up into the gap. Enemy pieces always block, even ones telegraphed to move away.
 - **Friendly collision** (two of your own pieces planned to the same cell): the higher-Priority piece takes the cell and the other is Bounced. If Priority is tied, both are Bounced. A deliberate risk for extra play and chance.
 - **Planned-move markers**: a cell one of your pieces is moving into is marked with that piece's outline. The enemy's telegraphed destinations do not block your pieces.
 
@@ -175,6 +176,13 @@ A shared event used by multiple mechanics (collisions, tiles, bosses, etc.):
 **Enemy**
 
 - No trained model. The enemy uses rule-based decision logic to choose which attacks to throw out each turn, which of them are telegraphed, and how it responds to your board.
+- The enemy plans from the board at the start of the turn, before you plan. It can't see your plan.
+- Level 1: the enemy makes 2 moves per turn, the same as your Energy.
+- First version: every enemy move is telegraphed. Hidden moves come later.
+- First decision rules (greedy plus safety):
+  - Prefer capturing your most valuable piece it can reach.
+  - Avoid moving onto squares your pieces attack, unless the capture is worth more than the piece it risks.
+  - Otherwise, make a safe move. If no move is safe, make any legal move.
 
 **Upgrade**
 
@@ -187,6 +195,11 @@ A shared event used by multiple mechanics (collisions, tiles, bosses, etc.):
   - Double Points: the piece earns double points from pieces it captures (money only, not kills)
 - Upgrades belong to the piece, not to a square, so they carry over unchanged when the color roll flips the board.
 - Piece storage (later addition): a bin of extra pieces bought from the shop. Between rounds, the player can swap pieces from the bin into their starting army.
+- **The Box** (cardboard to wooden, may upgrade with the run): a grid of slots beside the board, like an inventory.
+  - During a round, your pieces that are captured or die go into the Box instead of vanishing.
+  - Between rounds, it's the piece storage bin: shop pieces and variants sit in the same grid.
+- **Captured enemy pieces** line up in a row above the board at half size, in the order they were taken.
+- **Injured, then back:** a piece that ended up in the Box returns for the next round, but with a penalty (TBD, e.g. -1 Health next round, or points to repair).
 
 **Tiles**
 
@@ -244,8 +257,8 @@ Repeat:
 - The 4 piece variants
 - More Kings
 - Piece storage bin: capacity, shop pricing, when swaps are allowed
+- Injury penalty for pieces that end a round in the Box
 - Which tile modifiers (if any) use placement B or C
-- Blocking pass-through for enemy pieces: does a sliding piece pass through an enemy that's moving away, including untelegraphed moves the player couldn't see?
 
 **Concerns**
 

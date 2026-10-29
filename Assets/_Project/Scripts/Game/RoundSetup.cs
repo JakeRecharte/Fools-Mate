@@ -29,6 +29,10 @@ namespace FoolsMate.Game
         [Min(0)]
         [SerializeField] private int energyPerTurn = 2;
 
+        [Tooltip("Moves the enemy makes each turn. Level 1 is 2.")]
+        [Min(0)]
+        [SerializeField] private int enemyMovesPerTurn = 2;
+
         [Tooltip("Enemy pieces to capture to win the round. Level 1 is 4.")]
         [Min(1)]
         [SerializeField] private int tribute = 4;
@@ -67,7 +71,8 @@ namespace FoolsMate.Game
             var score = new RoundScore(rolledColor, tribute, turnLimit);
 
             boardView.Show(board, rolledColor);
-            turnController.Begin(board, boardView, rolledColor, energyPerTurn, new System.Random(seed), score);
+            turnController.Begin(board, boardView, rolledColor, energyPerTurn, enemyMovesPerTurn,
+                new System.Random(seed), score);
         }
 
         private PieceColor RollPlayerColor()

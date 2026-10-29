@@ -127,7 +127,7 @@ ScriptedImporter:
   animatedSpriteImportData:
   - name: PiecePalette
     originalName: 
-    pivot: {x: 0.4375, y: 0}
+    pivot: {x: 0.45833334, y: 0}
     alignment: 9
     border: {x: 0, y: 0, z: 0, w: 0}
     customData: 
@@ -135,7 +135,7 @@ ScriptedImporter:
       serializedVersion: 2
       x: 4
       y: 4
-      width: 8
+      width: 12
       height: 1
     spriteID: 5b9b5e6eb0edb41fbb1168f481dfd5cc
     spriteBone: []
@@ -167,7 +167,7 @@ ScriptedImporter:
       cellRect:
         x: 0
         y: 0
-        width: 9
+        width: 13
         height: 1
       spriteId: 5b9b5e6eb0edb41fbb1168f481dfd5cc
     linkedCells: []
@@ -178,5 +178,5 @@ ScriptedImporter:
   platformSettings: []
   generatePhysicsShape: 0
   secondarySpriteTextures: []
-  previousTextureSize: {x: 16, y: 16}
-  canvasSize: {x: 9, y: 1}
+  previousTextureSize: {x: 32, y: 16}
+  canvasSize: {x: 13, y: 1}

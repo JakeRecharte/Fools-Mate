@@ -150,5 +150,78 @@ namespace FoolsMate.Core.Tests
 
             Assert.Throws<System.Collections.Generic.KeyNotFoundException>(() => board.GetCell(MakePiece(1)));
         }
+
+        [Test]
+        public void GetRemoved_NothingRemoved_IsEmpty()
+        {
+            var board = new BoardState();
+            board.Place(MakePiece(1), PieceColor.White, new Cell(0, 1));
+
+            Assert.IsEmpty(board.GetRemoved(PieceColor.White));
+        }
+
+        [Test]
+        public void Remove_AddsToRemoved()
+        {
+            var board = new BoardState();
+            Piece pawn = MakePiece(1);
+            board.Place(pawn, PieceColor.White, new Cell(0, 1));
+
+            board.Remove(pawn);
+
+            CollectionAssert.AreEqual(new[] { pawn }, board.GetRemoved(PieceColor.White).ToList());
+            CollectionAssert.DoesNotContain(board.Pieces.ToList(), pawn);
+        }
+
+        [Test]
+        public void GetRemoved_OnlyReturnsThatColor()
+        {
+            var board = new BoardState();
+            Piece white = MakePiece(1);
+            Piece black = MakePiece(2);
+            board.Place(white, PieceColor.White, new Cell(0, 1));
+            board.Place(black, PieceColor.Black, new Cell(0, 6));
+
+            board.Remove(white);
+            board.Remove(black);
+
+            CollectionAssert.AreEqual(new[] { white }, board.GetRemoved(PieceColor.White).ToList());
+            CollectionAssert.AreEqual(new[] { black }, board.GetRemoved(PieceColor.Black).ToList());
+        }
+
+        [Test]
+        public void GetRemoved_KeepsRemovalOrder()
+        {
+            var board = new BoardState();
+            Piece first = MakePiece(1);
+            Piece second = MakePiece(2);
+            Piece third = MakePiece(3);
+            board.Place(first, PieceColor.White, new Cell(0, 1));
+            board.Place(second, PieceColor.White, new Cell(1, 1));
+            board.Place(third, PieceColor.White, new Cell(2, 1));
+
+            board.Remove(third);
+            board.Remove(first);
+            board.Remove(second);
+
+            CollectionAssert.AreEqual(new[] { third, first, second }, board.GetRemoved(PieceColor.White).ToList());
+        }
+
+        [Test]
+        public void Resolve_Capture_PutsVictimInRemoved()
+        {
+            var board = new BoardState();
+            Piece attacker = MakePiece(1, PieceType.Rook);
+            Piece victim = new Piece(2, "test", PieceType.Pawn, new PieceStats(1, 1, 1, 1));
+            board.Place(attacker, PieceColor.White, new Cell(0, 0));
+            board.Place(victim, PieceColor.Black, new Cell(0, 5));
+            var plan = new TurnPlan(1);
+            plan.TryPlan(new PlannedMove(attacker, new Cell(0, 0), new Cell(0, 5)));
+
+            MoveResolver.Resolve(board, plan, new Random(1));
+
+            CollectionAssert.AreEqual(new[] { victim }, board.GetRemoved(PieceColor.Black).ToList());
+            Assert.IsEmpty(board.GetRemoved(PieceColor.White));
+        }
     }
 }
