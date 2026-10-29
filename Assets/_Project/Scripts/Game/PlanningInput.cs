@@ -23,6 +23,7 @@ namespace FoolsMate.Game
 
         private BoardState board;
         private PieceColor playerColor;
+        private TurnPlan enemyPlan;
         private Piece selected;
         private List<Cell> selectedTargets = new List<Cell>();
 
@@ -32,11 +33,15 @@ namespace FoolsMate.Game
         /// <summary>Raised whenever a move is planned or cancelled.</summary>
         public event Action PlanChanged;
 
-        /// <summary>Called by <see cref="TurnController"/> at the start of a turn.</summary>
-        public void Begin(BoardState board, PieceColor playerColor, int energy)
+        /// <summary>
+        /// Called by <see cref="TurnController"/> at the start of a turn, after the enemy has telegraphed
+        /// <paramref name="enemyPlan"/>.
+        /// </summary>
+        public void Begin(BoardState board, PieceColor playerColor, int energy, TurnPlan enemyPlan)
         {
             this.board = board;
             this.playerColor = playerColor;
+            this.enemyPlan = enemyPlan;
             Plan = new TurnPlan(energy);
             Deselect();
             RefreshPlan();
@@ -151,8 +156,9 @@ namespace FoolsMate.Game
         {
             selected = piece;
 
-            // Planned movers are passed in so sliding pieces can see past them.
-            selectedTargets = MoveTargets.GetTargets(board, piece, Plan.MovingPieces);
+            // The plan is passed in so sliding pieces can see past planned movers but stop where they land.
+            // The enemy plan rules out cells its pieces are leaving.
+            selectedTargets = MoveTargets.GetTargets(board, piece, Plan, enemyPlan);
             boardView.ShowTargets(cell, selectedTargets);
         }
 
@@ -166,7 +172,7 @@ namespace FoolsMate.Game
         private void RefreshPlan()
         {
             // Checked live so a ghost turns red the moment its plan stops being valid.
-            var problemPieces = new HashSet<Piece>(MoveCheck.Validate(board, Plan).Select(problem => problem.Piece));
+            var problemPieces = new HashSet<Piece>(MoveCheck.Validate(board, Plan, enemyPlan).Select(problem => problem.Piece));
             boardView.ShowPlan(board, Plan, problemPieces);
 
             if (energyText != null)

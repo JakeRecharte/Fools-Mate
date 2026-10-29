@@ -9,6 +9,7 @@ namespace FoolsMate.Core.Tests
     {
         private BoardState board;
         private TurnPlan plan;
+        private TurnPlan enemyPlan;
         private int nextId;
 
         [SetUp]
@@ -16,6 +17,7 @@ namespace FoolsMate.Core.Tests
         {
             board = new BoardState();
             plan = new TurnPlan(8);
+            enemyPlan = new TurnPlan(8);
             nextId = 1;
         }
 
@@ -31,9 +33,19 @@ namespace FoolsMate.Core.Tests
             Assert.IsTrue(plan.TryPlan(new PlannedMove(piece, board.GetCell(piece), new Cell(file, rank))));
         }
 
+        private void PlanEnemyMove(Piece piece, int file, int rank)
+        {
+            Assert.IsTrue(enemyPlan.TryPlan(new PlannedMove(piece, board.GetCell(piece), new Cell(file, rank))));
+        }
+
         private List<ResolutionEvent> Resolve(int seed = 1)
         {
-            return MoveResolver.Resolve(board, plan, new Random(seed));
+            return MoveResolver.Resolve(board, plan, enemyPlan, new Random(seed));
+        }
+
+        private static List<ResolutionEvent> OfKind(List<ResolutionEvent> events, ResolutionEventKind kind)
+        {
+            return events.Where(e => e.Kind == kind).ToList();
         }
 
         private static bool IsOnBoard(BoardState state, Piece piece)
@@ -249,12 +261,181 @@ namespace FoolsMate.Core.Tests
             CollectionAssert.AreEqual(RunOnce(), RunOnce());
         }
 
+        // Both sides
+
+        [Test]
+        public void EnemyCollision_TiedPriority_BothDie_NobodyEarnsIt()
+        {
+            Piece white = Place(PieceColor.White, 3, 0);
+            Piece black = Place(PieceColor.Black, 3, 7);
+            PlanMove(white, 3, 4);
+            PlanEnemyMove(black, 3, 4);
+
+            List<ResolutionEvent> events = Resolve();
+
+            Assert.IsFalse(IsOnBoard(board, white));
+            Assert.IsFalse(IsOnBoard(board, black));
+            Assert.IsEmpty(OfKind(events, ResolutionEventKind.Captured));
+            Assert.AreEqual(2, OfKind(events, ResolutionEventKind.Died).Count);
+            Assert.IsNull(board.GetPieceAt(new Cell(3, 4)));
+        }
+
+        [Test]
+        public void EnemyCollision_BothDie_HigherPriorityEarnsIt()
+        {
+            Piece white = Place(PieceColor.White, 3, 0, priority: 2);
+            Piece black = Place(PieceColor.Black, 3, 7, priority: 1);
+            PlanMove(white, 3, 4);
+            PlanEnemyMove(black, 3, 4);
+
+            List<ResolutionEvent> events = Resolve();
+
+            List<ResolutionEvent> captures = OfKind(events, ResolutionEventKind.Captured);
+            Assert.AreEqual(1, captures.Count);
+            Assert.AreEqual(black, captures[0].Piece);
+            Assert.AreEqual(white, captures[0].By);
+            Assert.AreEqual(PieceColor.White, captures[0].ByColor);
+
+            List<ResolutionEvent> deaths = OfKind(events, ResolutionEventKind.Died);
+            Assert.AreEqual(1, deaths.Count);
+            Assert.AreEqual(white, deaths[0].Piece);
+            Assert.IsFalse(IsOnBoard(board, white));
+        }
+
+        [Test]
+        public void EnemyCollision_OneSurvives_TakesTheCell()
+        {
+            Piece white = Place(PieceColor.White, 3, 0, health: 2);
+            Piece black = Place(PieceColor.Black, 3, 7);
+            PlanMove(white, 3, 4);
+            PlanEnemyMove(black, 3, 4);
+
+            List<ResolutionEvent> events = Resolve();
+
+            Assert.AreEqual(new Cell(3, 4), board.GetCell(white));
+            Assert.AreEqual(1, board.GetCurrentHealth(white));
+            Assert.IsFalse(IsOnBoard(board, black));
+
+            List<ResolutionEvent> captures = OfKind(events, ResolutionEventKind.Captured);
+            Assert.AreEqual(1, captures.Count);
+            Assert.AreEqual(black, captures[0].Piece);
+            Assert.AreEqual(PieceColor.White, captures[0].ByColor);
+            Assert.AreEqual(1, OfKind(events, ResolutionEventKind.Damaged).Count);
+            Assert.AreEqual(1, OfKind(events, ResolutionEventKind.Moved).Count);
+        }
+
+        [Test]
+        public void EnemyCollision_BothSurvive_Track1_BothDie()
+        {
+            Piece white = Place(PieceColor.White, 3, 0, priority: 1, health: 3);
+            Piece black = Place(PieceColor.Black, 3, 7, priority: 2, health: 3);
+            PlanMove(white, 3, 4);
+            PlanEnemyMove(black, 3, 4);
+
+            List<ResolutionEvent> events = Resolve();
+
+            Assert.IsFalse(IsOnBoard(board, white));
+            Assert.IsFalse(IsOnBoard(board, black));
+
+            List<ResolutionEvent> captures = OfKind(events, ResolutionEventKind.Captured);
+            Assert.AreEqual(1, captures.Count);
+            Assert.AreEqual(white, captures[0].Piece);
+            Assert.AreEqual(PieceColor.Black, captures[0].ByColor);
+        }
+
+        [Test]
+        public void Swap_AcrossSides_PassesThrough()
+        {
+            Piece white = Place(PieceColor.White, 3, 3);
+            Piece black = Place(PieceColor.Black, 3, 4);
+            PlanMove(white, 3, 4);
+            PlanEnemyMove(black, 3, 3);
+
+            List<ResolutionEvent> events = Resolve();
+
+            Assert.AreEqual(new Cell(3, 4), board.GetCell(white));
+            Assert.AreEqual(new Cell(3, 3), board.GetCell(black));
+            Assert.IsTrue(events.All(e => e.Kind == ResolutionEventKind.Moved));
+        }
+
+        [Test]
+        public void EnemyMovingAway_DodgesTheAttack()
+        {
+            Piece white = Place(PieceColor.White, 3, 0);
+            Piece black = Place(PieceColor.Black, 3, 5);
+            PlanMove(white, 3, 5);
+            PlanEnemyMove(black, 6, 5);
+
+            List<ResolutionEvent> events = Resolve();
+
+            Assert.AreEqual(new Cell(3, 5), board.GetCell(white));
+            Assert.AreEqual(new Cell(6, 5), board.GetCell(black));
+            Assert.IsEmpty(OfKind(events, ResolutionEventKind.Captured));
+        }
+
+        [Test]
+        public void EnemyAttack_CapturesStayingPlayerPiece()
+        {
+            Piece white = Place(PieceColor.White, 3, 2);
+            Piece black = Place(PieceColor.Black, 3, 7);
+            PlanEnemyMove(black, 3, 2);
+
+            List<ResolutionEvent> events = Resolve();
+
+            Assert.IsFalse(IsOnBoard(board, white));
+            Assert.AreEqual(new Cell(3, 2), board.GetCell(black));
+            List<ResolutionEvent> captures = OfKind(events, ResolutionEventKind.Captured);
+            Assert.AreEqual(1, captures.Count);
+            Assert.AreEqual(PieceColor.Black, captures[0].ByColor);
+        }
+
+        [Test]
+        public void FriendlyTie_ThenEnemyTakesTheCellUncontested()
+        {
+            Piece left = Place(PieceColor.White, 0, 4);
+            Piece right = Place(PieceColor.White, 6, 4);
+            Piece black = Place(PieceColor.Black, 3, 7);
+            PlanMove(left, 3, 4);
+            PlanMove(right, 3, 4);
+            PlanEnemyMove(black, 3, 4);
+
+            List<ResolutionEvent> events = Resolve();
+
+            Assert.AreEqual(new Cell(3, 4), board.GetCell(black));
+            Assert.AreEqual(2, OfKind(events, ResolutionEventKind.Bounced).Count
+                + OfKind(events, ResolutionEventKind.Died).Count);
+            Assert.AreNotEqual(new Cell(3, 4), board.GetCell(left));
+            Assert.AreNotEqual(new Cell(3, 4), board.GetCell(right));
+        }
+
+        [Test]
+        public void CollisionWinner_GoesOnToAttackStayingPiece()
+        {
+            // White and a black mover collide on a cell where another black piece is staying put. White survives
+            // the collision, then attacks the staying piece.
+            Piece white = Place(PieceColor.White, 3, 0, health: 2);
+            Piece mover = Place(PieceColor.Black, 0, 4);
+            Piece stayer = Place(PieceColor.Black, 3, 4);
+            PlanMove(white, 3, 4);
+
+            // Not a move the planner would make, but the resolver still copes with it.
+            PlanEnemyMove(mover, 3, 4);
+
+            List<ResolutionEvent> events = Resolve();
+
+            Assert.AreEqual(new Cell(3, 4), board.GetCell(white));
+            Assert.IsFalse(IsOnBoard(board, mover));
+            Assert.IsFalse(IsOnBoard(board, stayer));
+            Assert.AreEqual(2, OfKind(events, ResolutionEventKind.Captured).Count);
+        }
+
         [Test]
         public void NullArguments_Throw()
         {
             Assert.Throws<ArgumentNullException>(() => MoveResolver.Resolve(null, plan, new Random(1)));
             Assert.Throws<ArgumentNullException>(() => MoveResolver.Resolve(board, null, new Random(1)));
             Assert.Throws<ArgumentNullException>(() => MoveResolver.Resolve(board, plan, null));
+            Assert.Throws<ArgumentNullException>(() => MoveResolver.Resolve(board, plan, enemyPlan, null));
         }
     }
 }

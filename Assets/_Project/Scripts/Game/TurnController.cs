@@ -8,8 +8,9 @@ using UnityEngine.UI;
 namespace FoolsMate.Game
 {
     /// <summary>
-    /// Runs the turn loop: planning, the Move Check when MOVE is pressed, then resolution, scoring, a redraw,
-    /// and either the next turn's planning or the end of the round.
+    /// Runs the turn loop: the enemy's telegraphed plan, the player's planning, the Move Check when MOVE is
+    /// pressed, then both sides resolving together, scoring, a redraw, and either the next turn or the end of
+    /// the round.
     /// </summary>
     public class TurnController : MonoBehaviour
     {
@@ -24,23 +25,26 @@ namespace FoolsMate.Game
         private BoardView boardView;
         private PieceColor playerColor;
         private int energy;
+        private int enemyMoves;
         private System.Random random;
         private RoundScore score;
+        private TurnPlan enemyPlan;
 
         /// <summary>The turn being planned, counting from 1.</summary>
         private int Turn => score.TurnsTaken + 1;
 
         /// <summary>
         /// Called by <see cref="RoundSetup"/> once the round's board exists. The random source is shared for the
-        /// whole round so one seed replays every Bounce.
+        /// whole round so one seed replays every enemy plan and Bounce.
         /// </summary>
-        public void Begin(BoardState board, BoardView boardView, PieceColor playerColor, int energy,
+        public void Begin(BoardState board, BoardView boardView, PieceColor playerColor, int energy, int enemyMoves,
             System.Random random, RoundScore score)
         {
             this.board = board;
             this.boardView = boardView;
             this.playerColor = playerColor;
             this.energy = energy;
+            this.enemyMoves = enemyMoves;
             this.random = random;
             this.score = score;
 
@@ -55,14 +59,20 @@ namespace FoolsMate.Game
 
         private void StartNextTurn()
         {
-            planningInput.Begin(board, playerColor, energy);
+            // The enemy commits first and shows its hand, so the player plans around it.
+            enemyPlan = EnemyPlanner.Plan(board, playerColor.Opposite(), enemyMoves, random);
+            boardView.ShowEnemyPlan(board, enemyPlan);
+
+            planningInput.Begin(board, playerColor, energy, enemyPlan);
             ClearWarnings();
-            Debug.Log($"Turn {Turn}/{score.TurnLimit}: plan your moves.", this);
+            Debug.Log($"Turn {Turn}/{score.TurnLimit}: plan your moves. Enemy plans " +
+                $"{string.Join(", ", enemyPlan.Moves)}.", this);
         }
 
         private void EndRound()
         {
             planningInput.End();
+            boardView.ClearEnemyPlan();
 
             if (moveButton != null)
             {
@@ -133,7 +143,7 @@ namespace FoolsMate.Game
             }
 
             TurnPlan plan = planningInput.Plan;
-            List<MoveProblem> problems = MoveCheck.Validate(board, plan);
+            List<MoveProblem> problems = MoveCheck.Validate(board, plan, enemyPlan);
 
             if (problems.Count > 0)
             {
@@ -142,7 +152,7 @@ namespace FoolsMate.Game
             }
 
             // Logged before ApplyTurn, which moves the turn counter on.
-            List<ResolutionEvent> events = MoveResolver.Resolve(board, plan, random);
+            List<ResolutionEvent> events = MoveResolver.Resolve(board, plan, enemyPlan, random);
             LogEvents(events);
 
             score.ApplyTurn(events);

@@ -17,6 +17,9 @@ namespace FoolsMate.Core
 
         private readonly Dictionary<int, PlacedPiece> placed = new Dictionary<int, PlacedPiece>();
 
+        /// <summary>Pieces taken off this round, in the order they left. Kept so they can be shown off the board.</summary>
+        private readonly List<PlacedPiece> removed = new List<PlacedPiece>();
+
         public IEnumerable<Piece> Pieces => placed.Values.Select(p => p.Piece);
 
         public void PlaceArmy(Army army, PieceColor color)
@@ -126,6 +129,16 @@ namespace FoolsMate.Core
             }
 
             placed.Remove(piece.Id);
+            removed.Add(entry);
+        }
+
+        /// <summary>
+        /// One side's pieces taken off this round (captured or died), oldest first. Your side's go in the Box,
+        /// the enemy's in the row above the board.
+        /// </summary>
+        public IEnumerable<Piece> GetRemoved(PieceColor color)
+        {
+            return removed.Where(entry => entry.Color == color).Select(entry => entry.Piece);
         }
 
         /// <summary>Returns the piece on the cell, or null if the cell is empty or off the board.</summary>

@@ -147,5 +147,48 @@ namespace FoolsMate.Core.Tests
 
             Assert.AreEqual("Knight #1 can't move to d2: Pawn #2 is staying there.", Validate()[0].Message);
         }
+
+        [Test]
+        public void QueenPlannedPastPawnsLandingCell_IsUnreachable()
+        {
+            Piece queen = Place(PieceType.Queen, PieceColor.White, 3, 0);
+            Piece pawn = Place(PieceType.Pawn, PieceColor.White, 3, 1);
+            PlanMove(queen, 3, 5);
+            PlanMove(pawn, 3, 2);
+
+            List<MoveProblem> problems = Validate();
+
+            Assert.AreEqual(1, problems.Count);
+            Assert.AreEqual(queen, problems[0].Piece);
+            Assert.AreEqual(MoveProblemKind.Unreachable, problems[0].Kind);
+        }
+
+        [Test]
+        public void PawnDoubleStep_WithRookFollowing_IsFine()
+        {
+            Piece pawn = Place(PieceType.Pawn, PieceColor.Black, 7, 6);
+            Piece rook = Place(PieceType.Rook, PieceColor.Black, 7, 7);
+            PlanMove(pawn, 7, 4);
+            PlanMove(rook, 7, 5);
+
+            Assert.IsEmpty(Validate());
+        }
+
+        [Test]
+        public void MoveOntoEnemyMovingAway_IsUnreachable()
+        {
+            Piece rook = Place(PieceType.Rook, PieceColor.White, 0, 0);
+            Piece enemy = Place(PieceType.Rook, PieceColor.Black, 0, 5);
+            PlanMove(rook, 0, 5);
+            var enemyPlan = new TurnPlan(1);
+            enemyPlan.TryPlan(new PlannedMove(enemy, new Cell(0, 5), new Cell(0, 1)));
+
+            List<MoveProblem> problems = MoveCheck.Validate(board, plan, enemyPlan);
+
+            Assert.AreEqual(1, problems.Count);
+            Assert.AreEqual(rook, problems[0].Piece);
+            Assert.AreEqual(MoveProblemKind.Unreachable, problems[0].Kind);
+            StringAssert.Contains("is moving away", problems[0].Message);
+        }
     }
 }

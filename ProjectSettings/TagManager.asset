@@ -47,6 +47,9 @@ TagManager:
   - name: TileModifiers
     uniqueID: 3140503239
     locked: 0
+  - name: Arrows
+    uniqueID: 242107123
+    locked: 0
   - name: Pieces
     uniqueID: 1280768425
     locked: 0

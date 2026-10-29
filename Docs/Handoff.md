@@ -55,6 +55,7 @@ Enemy pieces moving creates real collisions and swaps, and `MoveResolver` curren
 
 - **Run loop:** lives, next round, shop, and a `LevelDefinition` asset to replace the Tribute and Turn Limit fields on `RoundSetup`.
 - **Piece stats:** every piece currently has Priority, Damage, and Health of 1, so every attack captures and every friendly collision ties, meaning both pieces Bounce. The doc's stat table is still TBD.
+- **Arrow alignment (deal with later):** piece sprites stand on a base that sits below the cell centre, so move arrows drawn through cell centres don't meet the piece bases. The marker art in `Art/Sprites/Markers` currently draws its end discs at the base height while the straight and diagonal body pieces run through the centre, so the parts don't quite line up. Options: draw everything centred and add a whole-pixel offset on `MoveArrow`, or move the piece sprites' pivot to the base.
 - **Open design questions** are in the doc's TO-DO list, for example whether sliding pieces pass through enemy pieces that are moving away, and how the Tribute scales.
 
 ## Checking code outside Unity (optional)
