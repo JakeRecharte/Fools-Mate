@@ -25,8 +25,9 @@ namespace FoolsMate.Game
 
         public void OnPointerEnter(PointerEventData eventData)
         {
+            // Selected in Update once the mouse moves, not here, so a cursor already resting on the button
+            // when the menu opens doesn't highlight it.
             IsHovered = true;
-            SelectIfInteractable();
         }
 
         public void OnPointerExit(PointerEventData eventData)
@@ -47,8 +48,8 @@ namespace FoolsMate.Game
 
         private void Update()
         {
-            // The keyboard may have moved the selection off this button while the mouse sat on it, so
-            // take it back once the mouse moves again.
+            // Also takes the selection back when the keyboard moved it off this button while the mouse sat
+            // on it.
             if (IsHovered && MouseMovedThisFrame() && EventSystem.current != null
                 && EventSystem.current.currentSelectedGameObject != gameObject)
             {

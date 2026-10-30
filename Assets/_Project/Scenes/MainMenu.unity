@@ -407,6 +407,7 @@ GameObject:
   - component: {fileID: 497035238}
   - component: {fileID: 497035237}
   - component: {fileID: 497035236}
+  - component: {fileID: 497035239}
   m_Layer: 5
   m_Name: StartRunButton
   m_TagString: Untagged
@@ -457,8 +458,8 @@ MonoBehaviour:
   m_Colors:
     m_NormalColor: {r: 1, g: 0.6462264, b: 0.6462264, a: 1}
     m_HighlightedColor: {r: 1, g: 0.6462264, b: 0.6462264, a: 1}
-    m_PressedColor: {r: 0.78431374, g: 0.78431374, b: 0.78431374, a: 1}
-    m_SelectedColor: {r: 1, g: 0.8509804, b: 0.4, a: 1}
+    m_PressedColor: {r: 0.85882354, g: 0.5176471, b: 0.5176471, a: 1}
+    m_SelectedColor: {r: 0.85882354, g: 0.5176471, b: 0.5176471, a: 1}
     m_DisabledColor: {r: 0.78431374, g: 0.78431374, b: 0.78431374, a: 0.5019608}
     m_ColorMultiplier: 1
     m_FadeDuration: 0.1
@@ -608,6 +609,7 @@ GameObject:
   - component: {fileID: 1328041498}
   - component: {fileID: 1328041497}
   - component: {fileID: 1328041501}
+  - component: {fileID: 1328041502}
   m_Layer: 5
   m_Name: Canvas
   m_TagString: Untagged
@@ -927,6 +929,7 @@ GameObject:
   - component: {fileID: 1473482708}
   - component: {fileID: 1473482707}
   - component: {fileID: 1473482706}
+  - component: {fileID: 1473482709}
   m_Layer: 5
   m_Name: QuitButton
   m_TagString: Untagged
@@ -977,8 +980,8 @@ MonoBehaviour:
   m_Colors:
     m_NormalColor: {r: 1, g: 0.6462264, b: 0.6462264, a: 1}
     m_HighlightedColor: {r: 1, g: 0.6462264, b: 0.6462264, a: 1}
-    m_PressedColor: {r: 0.78431374, g: 0.78431374, b: 0.78431374, a: 1}
-    m_SelectedColor: {r: 1, g: 0.8509804, b: 0.4, a: 1}
+    m_PressedColor: {r: 0.85882354, g: 0.5176471, b: 0.5176471, a: 1}
+    m_SelectedColor: {r: 0.85882354, g: 0.5176471, b: 0.5176471, a: 1}
     m_DisabledColor: {r: 0.78431374, g: 0.78431374, b: 0.78431374, a: 0.5019608}
     m_ColorMultiplier: 1
     m_FadeDuration: 0.1
@@ -1175,6 +1178,43 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 2088098503}
   m_CullTransparentMesh: 1
+--- !u!114 &497035239
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 497035234}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: a13aaeec1bce54cdaa7a09fc8c956185, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: FoolsMate.Game::FoolsMate.Game.SelectOnHover
+--- !u!114 &1473482709
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1473482704}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: a13aaeec1bce54cdaa7a09fc8c956185, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: FoolsMate.Game::FoolsMate.Game.SelectOnHover
+--- !u!114 &1328041502
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1328041496}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 78bd676abc2c1469da7dfc1ee692e81e, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: FoolsMate.Game::FoolsMate.Game.MenuSelection
+  defaultSelection: {fileID: 497035236}
 --- !u!1660057539 &9223372036854775807
 SceneRoots:
   m_ObjectHideFlags: 0
