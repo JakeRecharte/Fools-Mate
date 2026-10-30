@@ -956,7 +956,7 @@ MonoBehaviour:
   playerPlacementMarker: {fileID: 7776031484435945181, guid: d4c797254bf2f43bb91f5ec879264f8e, type: 3}
   enemyPlacementMarker: {fileID: 3257280512600217233, guid: d4c797254bf2f43bb91f5ec879264f8e, type: 3}
   clashMarker: {fileID: 8128012381806735729, guid: d4c797254bf2f43bb91f5ec879264f8e, type: 3}
-  ghostAlpha: 0.5
+  ghostAlpha: 1
   problemColor: {r: 0.7323774, g: 0.2980392, b: 1, a: 0.6}
   enemyGhostColor: {r: 1, g: 0.25648496, b: 0.19999999, a: 0.6}
   moveArrowPrefab: {fileID: 1578835871112680889, guid: b0870aeb241724aef926417eab4baa0e, type: 3}
@@ -985,7 +985,7 @@ MonoBehaviour:
   energyPerTurn: 2
   enemyMovesPerTurn: 2
   tribute: 4
-  turnLimit: 5
+  turnLimit: 10
   randomSeed: 0
 --- !u!114 &471499819
 MonoBehaviour:

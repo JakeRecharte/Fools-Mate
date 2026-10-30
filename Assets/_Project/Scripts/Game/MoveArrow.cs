@@ -6,16 +6,22 @@ namespace FoolsMate.Game
     /// <summary>
     /// Draws a planned move as a track of one sprite per cell: an end piece under the moving piece, middle
     /// pieces on the cells it passes, a bend on a knight's corner, and an end piece on the destination
-    /// pointing back the way it came. Lives on a prefab so the look (and later, animation) can change without
-    /// touching <see cref="BoardView"/>.
+    /// pointing back the way it came. Diagonals zig through the cell beside each step so the band stays
+    /// straight. Lives on a prefab so the look (and later, animation) can change without touching
+    /// <see cref="BoardView"/>.
     /// </summary>
     public class MoveArrow : MonoBehaviour
     {
-        // Same order as the frames (and tags) in the Markers .aseprite files.
+        // Up, Right, Down, Left: the order of the ends and middles slots.
         private static readonly Vector2Int[] Directions =
         {
-            new Vector2Int(0, 1), new Vector2Int(1, 1), new Vector2Int(1, 0), new Vector2Int(1, -1),
-            new Vector2Int(0, -1), new Vector2Int(-1, -1), new Vector2Int(-1, 0), new Vector2Int(-1, 1),
+            new Vector2Int(0, 1), new Vector2Int(1, 0), new Vector2Int(0, -1), new Vector2Int(-1, 0),
+        };
+
+        // Same order as the frames (and tags) in DiagonalStartAndEndPoint: UpRight, DownRight, UpLeft, DownLeft.
+        private static readonly Vector2Int[] DiagonalDirections =
+        {
+            new Vector2Int(1, 1), new Vector2Int(1, -1), new Vector2Int(-1, 1), new Vector2Int(-1, -1),
         };
 
         // Bend frames by the two cell edges they open onto, written as the sum of those edges' directions:
@@ -25,14 +31,27 @@ namespace FoolsMate.Game
             new Vector2Int(1, -1), new Vector2Int(1, 1), new Vector2Int(-1, 1), new Vector2Int(-1, -1),
         };
 
-        [Tooltip("StartAndEndPoints frames in order: Up, UpRight, Right, DownRight, Down, DownLeft, Left, UpLeft.")]
-        [SerializeField] private Sprite[] ends = new Sprite[8];
+        [Tooltip("StartAndEndPoints frames in order: Up, Right, Down, Left.")]
+        [ElementNames("Up", "Right", "Down", "Left")]
+        [SerializeField] private Sprite[] ends = new Sprite[4];
 
         [Tooltip("Middle frames, in the same order as Ends.")]
-        [SerializeField] private Sprite[] middles = new Sprite[8];
+        [ElementNames("Up", "Right", "Down", "Left")]
+        [SerializeField] private Sprite[] middles = new Sprite[4];
 
         [Tooltip("Bends frames in order: bottom + right, top + right, top + left, bottom + left.")]
+        [ElementNames("UpRight (bottom + right)", "DownRight (top + right)", "DownLeft (top + left)",
+            "UpLeft (bottom + left)")]
         [SerializeField] private Sprite[] bends = new Sprite[4];
+
+        [Tooltip("DiagonalMiddle frames in order: TopUpRight, BottomUpRight, TopUpLeft, BottomUpLeft. Top goes on " +
+            "the cells the move passes, Bottom on the cell beside each step.")]
+        [ElementNames("TopUpRight", "BottomUpRight", "TopUpLeft", "BottomUpLeft")]
+        [SerializeField] private Sprite[] diagonalMiddles = new Sprite[4];
+
+        [Tooltip("DiagonalStartAndEndPoint frames in order: UpRight, DownRight, UpLeft, DownLeft.")]
+        [ElementNames("UpRight", "DownRight", "UpLeft", "DownLeft")]
+        [SerializeField] private Sprite[] diagonalEnds = new Sprite[4];
 
         [Tooltip("Sorting layer for the track. Should be below Pieces so the start piece sits under the mover.")]
         [SerializeField] private string sortingLayer = "Arrows";
@@ -54,8 +73,15 @@ namespace FoolsMate.Game
                 return;
             }
 
-            // Straight or diagonal: every step is the same.
             var step = new Vector2Int(Math.Sign(delta.x), Math.Sign(delta.y));
+
+            if (absFile == absRank)
+            {
+                ShowDiagonal(from, to, step, color, cellToWorld);
+                return;
+            }
+
+            // Straight: every step is the same.
             AddPart(ends, step, from, color, cellToWorld);
 
             for (Vector2Int cell = from + step; cell != to; cell += step)
@@ -82,6 +108,35 @@ namespace FoolsMate.Game
             AddSprite(bends[bend], corner, color, cellToWorld);
 
             AddPart(ends, -shortStep, corner + shortStep, color, cellToWorld);
+        }
+
+        /// <summary>
+        /// The band zigs through the lower of the two cells beside each step (a Bottom piece), and through each
+        /// cell the move passes (a Top piece). So it leaves the start, and enters the destination, through a
+        /// side or bottom edge rather than a corner.
+        /// </summary>
+        private void ShowDiagonal(Vector2Int from, Vector2Int to, Vector2Int step, Color color,
+            Func<Vector2Int, Vector3> cellToWorld)
+        {
+            // UpRight and DownLeft are the same line, as are UpLeft and DownRight; each has a Top/Bottom pair
+            // in diagonalMiddles.
+            int set = step.x == step.y ? 0 : 2;
+            bool rising = step.y > 0;
+
+            AddSprite(diagonalEnds[Array.IndexOf(DiagonalDirections, step)], from, color, cellToWorld);
+
+            for (Vector2Int cell = from; cell != to; cell += step)
+            {
+                Vector2Int side = rising ? new Vector2Int(cell.x + step.x, cell.y) : new Vector2Int(cell.x, cell.y + step.y);
+                AddSprite(diagonalMiddles[set + 1], side, color, cellToWorld);
+
+                if (cell != from)
+                {
+                    AddSprite(diagonalMiddles[set], cell, color, cellToWorld);
+                }
+            }
+
+            AddSprite(diagonalEnds[Array.IndexOf(DiagonalDirections, -step)], to, color, cellToWorld);
         }
 
         private void AddPart(Sprite[] sprites, Vector2Int direction, Vector2Int cell, Color color,
