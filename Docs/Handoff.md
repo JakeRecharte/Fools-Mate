@@ -1,6 +1,6 @@
 # Handoff: next steps
 
-Last updated 2026-10-28. Read this first in a new session, together with `Docs/Fool's Mate.md` (the design doc, which is the source of truth for rules).
+Last updated 2026-10-29. Read this first in a new session, together with `Docs/Fool's Mate.md` (the design doc, which is the source of truth for rules).
 
 ## How to work with the user
 
@@ -11,7 +11,7 @@ Last updated 2026-10-28. Read this first in a new session, together with `Docs/F
 
 ## Where things stand
 
-Phase 1 (board and pieces) and Phase 2 steps M1–M7 and S1–S3 are done:
+Phase 1 (board and pieces), Phase 2 steps M1–M7 and S1–S3, and the enemy phase are done:
 
 - **Core** (`Assets/_Project/Scripts/Core`, pure C# with `noEngineReferences`, so no Unity APIs):
   - `BoardState` holds the pieces.
@@ -41,21 +41,34 @@ Phase 1 (board and pieces) and Phase 2 steps M1–M7 and S1–S3 are done:
 - `TurnController.DescribeOutcome` is public, so the HUD and the Console share the outcome wording.
 - **Pitfall:** Inspector changes made in Play mode are lost, so check that edits are saved with Play off.
 
-## Next step: the enemy phase (not started)
+## Enemy phase (done, PR #4)
 
-Start with a design pass before any code. Read the doc's enemy rules and Track 1 vs Track 2 collisions, then agree with the user on:
+- `EnemyPlanner` (Core) picks the enemy's moves each turn: greedy captures, plus moving pieces to safety. They're telegraphed as arrows to their destinations.
+- `MoveResolver` plays both sides' plans at once, including collisions between enemy and player pieces.
+- Sliding pieces can't overtake your own planned movers, and you can't move onto an enemy that's telegraphed to leave.
+- Removed pieces are kept, so the Box and the captured row can show them.
+- The design doc has the enemy rules and the Box.
+- Check rules still aren't done.
 
-- how the enemy picks its moves (simple rules first, some telegraphed)
-- how many moves it makes per turn
-- whether its moves resolve together with the player's in `MoveResolver`
+## Since PR #4 (on branch `main-menu`, not merged yet)
 
-Enemy pieces moving creates real collisions and swaps, and `MoveResolver` currently only expects the player's own pieces to move. Check rules come after that.
+- **Move arrows (done):** `MoveArrow` builds each arrow from one 32×32 sprite per cell, from the art in `Art/Sprites/Markers`.
+  - **Straight moves** use `StartAndEndPoints` and `Middle`, with 4 slots each: Up, Right, Down, Left. Those files still contain old diagonal frames that nothing uses; they can be deleted, but if frames move, check the prefab's slots afterwards.
+  - **Knights** use the straight ends and middles, plus `Bends` at the corner. A knight-only end set was tried and then removed, once the regular ends lined up.
+  - **Diagonals** zig so the band stays straight. Each step puts a Bottom piece (`DiagonalMiddle`) on the lower of the two cells beside it, and every cell the move passes gets a Top piece. So the band leaves the start, and enters the destination, through a side or bottom edge rather than a corner. The ends come from `DiagonalStartAndEndPoint`, picked by direction like the straight ends: the move's direction at the start, the opposite one at the destination. UpRight/DownLeft share one Top/Bottom pair and UpLeft/DownRight the other. The 1px offset between the Top and Bottom pieces is intentional; it keeps the line straight.
+  - The marker sprites are named after their Aseprite tags (`End_Up`, `Diagonal_TopUpRight`, `DiagonalEnd_DownLeft`, ...). The importer keeps a sprite's existing name when it reimports, so a file that started with one frame keeps that frame's old name until it's renamed in the `.meta`.
+- **Move markers:** `BoardView` no longer draws ghosts on empty destinations. The player marker goes on an enemy piece you're moving onto, the enemy marker on your piece a telegraphed enemy moves onto, and the clash marker on any cell both sides move into.
+- **`ElementNames` attribute:** names the elements of the `MoveArrow` sprite arrays in the Inspector ("Up", "TopUpRight", ...) so it's clear which frame goes in which slot.
+- **Main menu (in progress):**
+  - `Scenes/MainMenu.unity` is first in the build list, ahead of `Game`.
+  - `MainMenu` wires the Start Run button (loads `Game` by name) and the Quit button.
+  - `MenuSelection` and `SelectOnHover` let the keyboard and the mouse share one highlight.
+- `.idea/` is now in `.gitignore`.
 
-## After the enemy phase
+## Next steps
 
 - **Run loop:** lives, next round, shop, and a `LevelDefinition` asset to replace the Tribute and Turn Limit fields on `RoundSetup`.
 - **Piece stats:** every piece currently has Priority, Damage, and Health of 1, so every attack captures and every friendly collision ties, meaning both pieces Bounce. The doc's stat table is still TBD.
-- **Arrow alignment (deal with later):** piece sprites stand on a base that sits below the cell centre, so move arrows drawn through cell centres don't meet the piece bases. The marker art in `Art/Sprites/Markers` currently draws its end discs at the base height while the straight and diagonal body pieces run through the centre, so the parts don't quite line up. Options: draw everything centred and add a whole-pixel offset on `MoveArrow`, or move the piece sprites' pivot to the base.
 - **Open design questions** are in the doc's TO-DO list, for example whether sliding pieces pass through enemy pieces that are moving away, and how the Tribute scales.
 
 ## Checking code outside Unity (optional)
