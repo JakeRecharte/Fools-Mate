@@ -20,6 +20,9 @@ namespace FoolsMate.Game
         private const int GhostOrder = 0;
         private const int MarkerOrder = 2;
 
+        // Added to a dragged piece's sorting order so it's drawn over the board's pieces.
+        private const int DragOrder = 10;
+
         [SerializeField] private Tilemap boardTilemap;
         [SerializeField] private PieceCatalog catalog;
 
@@ -39,6 +42,13 @@ namespace FoolsMate.Game
 
         [Tooltip("Optional. Drawn on a cell that you and the enemy both plan to move into, occupied or not.")]
         [SerializeField] private Sprite clashMarker;
+
+        [Tooltip("Drawn on each of your pawns waiting to be promoted. Falls back to the Target Marker if empty.")]
+        [SerializeField] private Sprite promotionMarker;
+
+        [Tooltip("How fast the promotion markers flash after MOVE warns that a pawn will die, in flashes per second.")]
+        [Min(0f)]
+        [SerializeField] private float promotionFlashSpeed = 2f;
 
         [Tooltip("Opacity of the outline drawn where a piece is planned to move.")]
         [Range(0f, 1f)]
@@ -73,7 +83,14 @@ namespace FoolsMate.Game
         private readonly List<GameObject> enemyPlanObjects = new List<GameObject>();
         private readonly List<GameObject> enemyMarkerObjects = new List<GameObject>();
         private readonly List<GameObject> capturedObjects = new List<GameObject>();
+        private readonly List<GameObject> promotionObjects = new List<GameObject>();
+        private readonly Dictionary<Piece, GameObject> boxObjects = new Dictionary<Piece, GameObject>();
         private PieceColor playerColor;
+        private bool promotionWarning;
+
+        // The Box piece being dragged onto a pawn, and the slot it goes back to if it's dropped anywhere else.
+        private GameObject draggedObject;
+        private Vector3 dragStart;
 
         // Kept so the enemy's markers can be redrawn as the player's plan changes, for clashes.
         private BoardState enemyPlanBoard;
@@ -84,6 +101,19 @@ namespace FoolsMate.Game
         {
             this.playerColor = playerColor;
             Clear();
+            ShowPieces(board);
+        }
+
+        /// <summary>
+        /// Redraws the pieces, on the board and off it, but leaves the plans and markers, e.g. after a promotion
+        /// mid-turn.
+        /// </summary>
+        public void ShowPieces(BoardState board)
+        {
+            DestroyAll(pieceObjects);
+            DestroyAll(capturedObjects);
+            boxObjects.Clear();
+            draggedObject = null;
 
             foreach (Piece piece in board.Pieces)
             {
@@ -230,6 +260,97 @@ namespace FoolsMate.Game
             DestroyAll(markerObjects);
         }
 
+        /// <summary>Marks the cells of your pawns waiting to be promoted.</summary>
+        public void ShowPromotions(IEnumerable<Cell> cells)
+        {
+            ClearPromotions();
+
+            Sprite sprite = promotionMarker != null ? promotionMarker : targetMarker;
+            foreach (Cell cell in cells)
+            {
+                var markerObject = new GameObject($"Promotion {cell}");
+                markerObject.transform.SetParent(transform, false);
+                markerObject.transform.position = CellToWorld(cell);
+                AddSprite(markerObject, sprite, PreviewLayer, MarkerOrder, Color.white);
+                promotionObjects.Add(markerObject);
+            }
+        }
+
+        public void ClearPromotions()
+        {
+            DestroyAll(promotionObjects);
+            promotionWarning = false;
+        }
+
+        /// <summary>Flashes the promotion markers while MOVE is warning that a pawn will die.</summary>
+        public void SetPromotionWarning(bool warning)
+        {
+            promotionWarning = warning;
+
+            if (!warning)
+            {
+                SetPromotionAlpha(1f);
+            }
+        }
+
+        /// <summary>The piece in the Box slot under a world position, or false if there's none.</summary>
+        public bool TryGetBoxPiece(BoardState board, Vector3 world, out Piece piece)
+        {
+            piece = null;
+
+            if (boxGrid == null)
+            {
+                return false;
+            }
+
+            // Slots fill left to right, then each new row one step further down, as in ShowCaptured.
+            Vector3Int slot = boxGrid.WorldToCell(world);
+            int column = slot.x;
+            int row = -slot.y;
+            if (column < 0 || column >= boxColumns || row < 0)
+            {
+                return false;
+            }
+
+            piece = board.GetRemoved(playerColor).ElementAtOrDefault(row * boxColumns + column);
+            return piece != null;
+        }
+
+        /// <summary>Picks a Box piece up to drag it. It stays Box-sized until a promotion redraws it on the board.</summary>
+        public void StartDrag(Piece piece)
+        {
+            CancelDrag();
+
+            if (!boxObjects.TryGetValue(piece, out draggedObject))
+            {
+                return;
+            }
+
+            dragStart = draggedObject.transform.position;
+            SetDragOrder(draggedObject, DragOrder);
+        }
+
+        public void MoveDrag(Vector3 world)
+        {
+            if (draggedObject != null)
+            {
+                draggedObject.transform.position = world;
+            }
+        }
+
+        /// <summary>Puts the dragged piece back in its Box slot.</summary>
+        public void CancelDrag()
+        {
+            if (draggedObject == null)
+            {
+                return;
+            }
+
+            draggedObject.transform.position = dragStart;
+            SetDragOrder(draggedObject, -DragOrder);
+            draggedObject = null;
+        }
+
         /// <summary>World position of a cell's centre, rotated 180° when the player is black.</summary>
         public Vector3 CellToWorld(Cell cell)
         {
@@ -252,8 +373,11 @@ namespace FoolsMate.Game
             ClearTargets();
             ClearPlan();
             ClearEnemyPlan();
+            ClearPromotions();
             DestroyAll(pieceObjects);
             DestroyAll(capturedObjects);
+            boxObjects.Clear();
+            draggedObject = null;
         }
 
         /// <summary>
@@ -269,7 +393,7 @@ namespace FoolsMate.Game
                 {
                     // Grid rows count up, so each new row of slots is one step further down.
                     var slot = new Vector3Int(i % boxColumns, -(i / boxColumns), 0);
-                    AddCapturedPiece(piece, playerColor, boxGrid.GetCellCenterWorld(slot));
+                    boxObjects[piece] = AddCapturedPiece(piece, playerColor, boxGrid.GetCellCenterWorld(slot));
                     i++;
                 }
             }
@@ -286,12 +410,41 @@ namespace FoolsMate.Game
             }
         }
 
-        private void AddCapturedPiece(Piece piece, PieceColor color, Vector3 position)
+        private GameObject AddCapturedPiece(Piece piece, PieceColor color, Vector3 position)
         {
             GameObject pieceObject = CreatePieceObject($"Captured {color} {piece}", piece, color, position,
                 PieceLayer, 0, Color.white);
             pieceObject.transform.localScale = Vector3.one * capturedScale;
             capturedObjects.Add(pieceObject);
+            return pieceObject;
+        }
+
+        private void Update()
+        {
+            if (promotionWarning)
+            {
+                SetPromotionAlpha(Mathf.Lerp(0.25f, 1f, Mathf.PingPong(Time.time * promotionFlashSpeed * 2f, 1f)));
+            }
+        }
+
+        private void SetPromotionAlpha(float alpha)
+        {
+            foreach (GameObject markerObject in promotionObjects)
+            {
+                var spriteRenderer = markerObject.GetComponent<SpriteRenderer>();
+                Color color = spriteRenderer.color;
+                color.a = alpha;
+                spriteRenderer.color = color;
+            }
+        }
+
+        /// <summary>Shifts the sorting order of a piece and its shade, so a dragged piece draws on top.</summary>
+        private static void SetDragOrder(GameObject pieceObject, int change)
+        {
+            foreach (SpriteRenderer spriteRenderer in pieceObject.GetComponentsInChildren<SpriteRenderer>())
+            {
+                spriteRenderer.sortingOrder += change;
+            }
         }
 
         /// <summary>Marks a cell a planned move lands on, with the marker sprite in <paramref name="markerColor"/>.</summary>

@@ -182,8 +182,9 @@ A shared event used by multiple mechanics (collisions, tiles, bosses, etc.):
   - Promotion happens at the start of the next planning phase. The pawn's tile is highlighted, and the pawn has no moves, so it can't be selected for planning.
   - You promote by dragging a piece from the Box onto the highlighted tile. It stays at Box size (16x16) while dragged and grows to full size (32x32) when dropped on the tile, replacing the pawn. Dropping it anywhere else sends it back to its slot.
   - Pawns and Kings can't be picked, and neither can broken pieces (at their Crack limit, see Piece stats).
-  - The promoted piece keeps its own Health, upgrades, and Cracks. Coming out of the Box doesn't remove the Crack it gained when it went in.
-  - Until MOVE is pressed you can change your choice: drag it back to the Box, or drop a different piece onto the tile.
+  - The promoted piece comes back at full Health and keeps its upgrades and Cracks. Coming out of the Box doesn't remove the Crack it gained when it went in.
+  - The pawn takes the promoted piece's slot in the Box. It wasn't killed, so it doesn't gain a Crack, and it's back as a pawn next round.
+  - A drop is final. Undoing a promotion (dragging the piece back to the Box before MOVE) may come later.
   - The promoted piece can be planned in the same phase it was placed. This is intended: the enemy telegraphed its moves against a pawn, so promoting earns a turn the enemy didn't plan for.
   - Promoting is free. Moving the promoted piece costs Energy as usual.
   - If more than one pawn reaches the last rank on the same turn, each tile is highlighted and takes one piece.

@@ -71,8 +71,10 @@ namespace FoolsMate.Game
             var score = new RoundScore(rolledColor, tribute, turnLimit);
 
             boardView.Show(board, rolledColor);
+
+            // Enemy pawns promote to new pieces, from the same ID source so they don't collide either.
             turnController.Begin(board, boardView, rolledColor, energyPerTurn, enemyMovesPerTurn,
-                new System.Random(seed), score);
+                new System.Random(seed), score, type => catalog.CreatePiece(type, ids));
         }
 
         private PieceColor RollPlayerColor()

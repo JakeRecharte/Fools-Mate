@@ -40,6 +40,13 @@ namespace FoolsMate.Game
             throw new KeyNotFoundException($"No piece definition of type {type} in {name}.");
         }
 
+        /// <summary>Creates a new unique piece from the base definition for a type.</summary>
+        public Piece CreatePiece(PieceType type, PieceIdSource ids)
+        {
+            PieceDefinition definition = GetByType(type);
+            return new Piece(ids.Next(), definition.Key, definition.Type, definition.Stats);
+        }
+
         // Unity calls this whenever the asset is edited in the Inspector.
         private void OnValidate()
         {
