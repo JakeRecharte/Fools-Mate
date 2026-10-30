@@ -67,5 +67,10 @@ MonoBehaviour:
   - {fileID: 3694721006561941882, guid: b8d09511b8c2d49ee948038da670b909, type: 3}
   - {fileID: 474966124434036966, guid: b8d09511b8c2d49ee948038da670b909, type: 3}
   - {fileID: 5115417110089078928, guid: b8d09511b8c2d49ee948038da670b909, type: 3}
+  knightEnds:
+  - {fileID: -421309385752186017, guid: 8ddf5f7bfb2a446d395c96d53b68e4f0, type: 3}
+  - {fileID: -8611604194414718338, guid: 8ddf5f7bfb2a446d395c96d53b68e4f0, type: 3}
+  - {fileID: 3079926388747878969, guid: 8ddf5f7bfb2a446d395c96d53b68e4f0, type: 3}
+  - {fileID: -4228269832499633438, guid: 8ddf5f7bfb2a446d395c96d53b68e4f0, type: 3}
   sortingLayer: Arrows
   sortingOrder: 0

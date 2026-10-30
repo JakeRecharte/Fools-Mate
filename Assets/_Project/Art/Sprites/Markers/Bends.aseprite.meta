@@ -125,7 +125,7 @@ ScriptedImporter:
     tessellationDetail: 0
     uvTransform: {x: 0, y: 0}
   animatedSpriteImportData:
-  - name: Frame_0
+  - name: Bend_UpRight
     originalName: 
     pivot: {x: 0.33333334, y: 0.6666667}
     alignment: 9
@@ -146,7 +146,7 @@ ScriptedImporter:
     edges: []
     tessellationDetail: 0
     uvTransform: {x: 4, y: 4}
-  - name: Frame_1
+  - name: Bend_DownRight
     originalName: 
     pivot: {x: 0.33333334, y: 0.33333334}
     alignment: 9
@@ -167,7 +167,7 @@ ScriptedImporter:
     edges: []
     tessellationDetail: 0
     uvTransform: {x: 4, y: 36}
-  - name: Frame_2
+  - name: Bend_DownLeft
     originalName: 
     pivot: {x: 0.6666667, y: 0.33333334}
     alignment: 9
@@ -188,7 +188,7 @@ ScriptedImporter:
     edges: []
     tessellationDetail: 0
     uvTransform: {x: 36, y: 4}
-  - name: Frame_3
+  - name: Bend_UpLeft
     originalName: 
     pivot: {x: 0.6666667, y: 0.6666667}
     alignment: 9
