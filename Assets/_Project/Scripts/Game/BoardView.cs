@@ -29,16 +29,15 @@ namespace FoolsMate.Game
         [Tooltip("Optional marker on the selected piece's own cell.")]
         [SerializeField] private Sprite selectedMarker;
 
-        [Tooltip("Optional. Drawn on the cell one of your planned pieces moves to, tinted with the Problem Color if " +
-            "the Move Check rejects it. Without it, a see-through copy of the piece is drawn instead.")]
+        [Tooltip("Optional. Drawn on an enemy piece one of your planned pieces moves onto, tinted with the Problem " +
+            "Color if the Move Check rejects the move.")]
         [FormerlySerializedAs("placementMarker")]
         [SerializeField] private Sprite playerPlacementMarker;
 
-        [Tooltip("Optional. Drawn on the cell a telegraphed enemy piece moves to. Without it, a copy of the piece " +
-            "in the Enemy Ghost Color is drawn instead.")]
+        [Tooltip("Optional. Drawn on one of your pieces a telegraphed enemy piece moves onto.")]
         [SerializeField] private Sprite enemyPlacementMarker;
 
-        [Tooltip("Optional. Replaces both markers on a cell that you and the enemy both plan to move into.")]
+        [Tooltip("Optional. Drawn on a cell that you and the enemy both plan to move into, occupied or not.")]
         [SerializeField] private Sprite clashMarker;
 
         [Tooltip("Opacity of the outline drawn where a piece is planned to move.")]
@@ -98,8 +97,9 @@ namespace FoolsMate.Game
         }
 
         /// <summary>
-        /// Marks each planned piece's destination cell, with an arrow from the piece, in the problem color for
-        /// pieces whose move the Move Check rejects. A cell the enemy is also moving into gets the clash marker.
+        /// Draws an arrow from each planned piece to its destination, in the problem color for pieces whose move
+        /// the Move Check rejects. A destination holding an enemy piece gets the player marker, and one the enemy
+        /// is also moving into gets the clash marker.
         /// </summary>
         public void ShowPlan(BoardState board, TurnPlan plan, ICollection<Piece> problemPieces)
         {
@@ -111,9 +111,22 @@ namespace FoolsMate.Game
             {
                 bool hasProblem = problemPieces != null && problemPieces.Contains(move.Piece);
                 Color color = hasProblem ? problemColor : ghostColor;
-                Sprite marker = clashMarker != null && IsEnemyDestination(move.To) ? clashMarker : playerPlacementMarker;
-                planObjects.Add(CreateGhost($"Plan {move}", board, move, marker, color,
-                    hasProblem ? problemColor : Color.white));
+                Sprite marker = null;
+                if (IsEnemyDestination(move.To))
+                {
+                    marker = clashMarker;
+                }
+                else if (IsOccupiedBy(board, move.To, playerColor.Opposite()))
+                {
+                    marker = playerPlacementMarker;
+                }
+
+                if (marker != null)
+                {
+                    planObjects.Add(CreateMoveMarker($"Plan {move}", move.To, marker,
+                        hasProblem ? problemColor : Color.white));
+                }
+
                 playerDestinations.Add(move.To);
 
                 if (moveArrowPrefab != null)
@@ -161,32 +174,39 @@ namespace FoolsMate.Game
         }
 
         /// <summary>
-        /// Redraws the enemy's destination markers, leaving out cells where the player's clash marker stands in.
+        /// Redraws the enemy marker on each of your pieces a telegraphed enemy piece moves onto, leaving out cells
+        /// where the player's clash marker stands in.
         /// </summary>
         private void ShowEnemyMarkers()
         {
             DestroyAll(enemyMarkerObjects);
 
-            if (enemyPlan == null)
+            if (enemyPlan == null || enemyPlacementMarker == null)
             {
                 return;
             }
 
             foreach (PlannedMove move in enemyPlan.Moves)
             {
-                if (clashMarker != null && playerDestinations.Contains(move.To))
+                if (playerDestinations.Contains(move.To) || !IsOccupiedBy(enemyPlanBoard, move.To, playerColor))
                 {
                     continue;
                 }
 
-                enemyMarkerObjects.Add(CreateGhost($"Enemy plan {move}", enemyPlanBoard, move, enemyPlacementMarker,
-                    enemyGhostColor, Color.white));
+                enemyMarkerObjects.Add(CreateMoveMarker($"Enemy plan {move}", move.To, enemyPlacementMarker,
+                    Color.white));
             }
         }
 
         private bool IsEnemyDestination(Cell cell)
         {
             return enemyPlan != null && enemyPlan.Moves.Any(move => move.To == cell);
+        }
+
+        private static bool IsOccupiedBy(BoardState board, Cell cell, PieceColor color)
+        {
+            Piece piece = board.GetPieceAt(cell);
+            return piece != null && board.GetColor(piece) == color;
         }
 
         /// <summary>Marks the selected piece's cell and every cell it can move to.</summary>
@@ -274,24 +294,14 @@ namespace FoolsMate.Game
             capturedObjects.Add(pieceObject);
         }
 
-        /// <summary>
-        /// Marks where a planned move lands: the marker sprite in <paramref name="markerColor"/> if there is one,
-        /// else a copy of the piece in <paramref name="pieceColor"/>.
-        /// </summary>
-        private GameObject CreateGhost(string objectName, BoardState board, PlannedMove move, Sprite marker,
-            Color pieceColor, Color markerColor)
+        /// <summary>Marks a cell a planned move lands on, with the marker sprite in <paramref name="markerColor"/>.</summary>
+        private GameObject CreateMoveMarker(string objectName, Cell cell, Sprite marker, Color markerColor)
         {
-            if (marker == null)
-            {
-                return CreatePieceObject(objectName, move.Piece, board.GetColor(move.Piece), CellToWorld(move.To),
-                    PreviewLayer, GhostOrder, pieceColor);
-            }
-
-            var ghost = new GameObject(objectName);
-            ghost.transform.SetParent(transform, false);
-            ghost.transform.position = CellToWorld(move.To);
-            AddSprite(ghost, marker, PreviewLayer, GhostOrder, markerColor);
-            return ghost;
+            var markerObject = new GameObject(objectName);
+            markerObject.transform.SetParent(transform, false);
+            markerObject.transform.position = CellToWorld(cell);
+            AddSprite(markerObject, marker, PreviewLayer, GhostOrder, markerColor);
+            return markerObject;
         }
 
         /// <summary>
