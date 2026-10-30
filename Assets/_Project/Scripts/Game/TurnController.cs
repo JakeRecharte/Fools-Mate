@@ -96,10 +96,10 @@ namespace FoolsMate.Game
 
             if (hud != null)
             {
-                hud.ShowOutcome(score.Outcome);
+                hud.ShowOutcome(score.Outcome, Run.Current);
             }
 
-            if (score.Outcome == RoundOutcome.OutOfTurns || score.Outcome == RoundOutcome.KingLost)
+            if (!IsWin(score.Outcome))
             {
                 SfxPlayer.Play(Sfx.Lose);
             }
@@ -113,6 +113,11 @@ namespace FoolsMate.Game
             }
         }
 
+        public static bool IsWin(RoundOutcome outcome)
+        {
+            return outcome == RoundOutcome.TributePaid || outcome == RoundOutcome.KingCaptured;
+        }
+
         public static string DescribeOutcome(RoundOutcome outcome)
         {
             switch (outcome)
@@ -122,9 +127,9 @@ namespace FoolsMate.Game
                 case RoundOutcome.KingCaptured:
                     return "Enemy King captured!";
                 case RoundOutcome.OutOfTurns:
-                    return "Out of turns. You lose a life.";
+                    return "Out of turns.";
                 case RoundOutcome.KingLost:
-                    return "Your King fell. You lose a life.";
+                    return "Your King fell.";
                 default:
                     return outcome.ToString();
             }
