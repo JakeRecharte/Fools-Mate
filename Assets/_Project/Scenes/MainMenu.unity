@@ -517,6 +517,18 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 497035234}
   m_CullTransparentMesh: 1
+--- !u!114 &497035239
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 497035234}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: a13aaeec1bce54cdaa7a09fc8c956185, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: FoolsMate.Game::FoolsMate.Game.SelectOnHover
 --- !u!1 &713616126
 GameObject:
   m_ObjectHideFlags: 0
@@ -716,6 +728,19 @@ MonoBehaviour:
   m_EditorClassIdentifier: FoolsMate.Game::FoolsMate.Game.MainMenu
   startRunButton: {fileID: 497035236}
   quitButton: {fileID: 1473482706}
+--- !u!114 &1328041502
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1328041496}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 78bd676abc2c1469da7dfc1ee692e81e, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: FoolsMate.Game::FoolsMate.Game.MenuSelection
+  defaultSelection: {fileID: 497035236}
 --- !u!1 &1330238868
 GameObject:
   m_ObjectHideFlags: 0
@@ -1039,6 +1064,18 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1473482704}
   m_CullTransparentMesh: 1
+--- !u!114 &1473482709
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1473482704}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: a13aaeec1bce54cdaa7a09fc8c956185, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: FoolsMate.Game::FoolsMate.Game.SelectOnHover
 --- !u!1 &2088098503
 GameObject:
   m_ObjectHideFlags: 0
@@ -1178,43 +1215,63 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 2088098503}
   m_CullTransparentMesh: 1
---- !u!114 &497035239
-MonoBehaviour:
+--- !u!1001 &1356674778526522670
+PrefabInstance:
   m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 497035234}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: a13aaeec1bce54cdaa7a09fc8c956185, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: FoolsMate.Game::FoolsMate.Game.SelectOnHover
---- !u!114 &1473482709
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1473482704}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: a13aaeec1bce54cdaa7a09fc8c956185, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: FoolsMate.Game::FoolsMate.Game.SelectOnHover
---- !u!114 &1328041502
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1328041496}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 78bd676abc2c1469da7dfc1ee692e81e, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: FoolsMate.Game::FoolsMate.Game.MenuSelection
-  defaultSelection: {fileID: 497035236}
+  serializedVersion: 2
+  m_Modification:
+    serializedVersion: 3
+    m_TransformParent: {fileID: 0}
+    m_Modifications:
+    - target: {fileID: 2826201892575961345, guid: b3724a5cc9b6949e7b0ab9ef764b7cc9, type: 3}
+      propertyPath: m_LocalPosition.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 2826201892575961345, guid: b3724a5cc9b6949e7b0ab9ef764b7cc9, type: 3}
+      propertyPath: m_LocalPosition.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 2826201892575961345, guid: b3724a5cc9b6949e7b0ab9ef764b7cc9, type: 3}
+      propertyPath: m_LocalPosition.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 2826201892575961345, guid: b3724a5cc9b6949e7b0ab9ef764b7cc9, type: 3}
+      propertyPath: m_LocalRotation.w
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 2826201892575961345, guid: b3724a5cc9b6949e7b0ab9ef764b7cc9, type: 3}
+      propertyPath: m_LocalRotation.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 2826201892575961345, guid: b3724a5cc9b6949e7b0ab9ef764b7cc9, type: 3}
+      propertyPath: m_LocalRotation.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 2826201892575961345, guid: b3724a5cc9b6949e7b0ab9ef764b7cc9, type: 3}
+      propertyPath: m_LocalRotation.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 2826201892575961345, guid: b3724a5cc9b6949e7b0ab9ef764b7cc9, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 2826201892575961345, guid: b3724a5cc9b6949e7b0ab9ef764b7cc9, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 2826201892575961345, guid: b3724a5cc9b6949e7b0ab9ef764b7cc9, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 8432754672474961332, guid: b3724a5cc9b6949e7b0ab9ef764b7cc9, type: 3}
+      propertyPath: m_Name
+      value: sfxPlayer
+      objectReference: {fileID: 0}
+    m_RemovedComponents: []
+    m_RemovedGameObjects: []
+    m_AddedGameObjects: []
+    m_AddedComponents: []
+  m_SourcePrefab: {fileID: 100100000, guid: b3724a5cc9b6949e7b0ab9ef764b7cc9, type: 3}
 --- !u!1660057539 &9223372036854775807
 SceneRoots:
   m_ObjectHideFlags: 0
@@ -1222,3 +1279,4 @@ SceneRoots:
   - {fileID: 1330238871}
   - {fileID: 713616129}
   - {fileID: 1328041500}
+  - {fileID: 1356674778526522670}

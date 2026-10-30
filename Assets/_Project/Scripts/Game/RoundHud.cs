@@ -78,6 +78,8 @@ namespace FoolsMate.Game
 
         private static void PlayAgain()
         {
+            SfxPlayer.Play(Sfx.Button);
+
             // A fresh load reruns RoundSetup, so the new round gets a new color and seed with nothing to reset.
             SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex);
         }

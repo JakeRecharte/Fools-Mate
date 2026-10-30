@@ -38,6 +38,7 @@ namespace FoolsMate.Game
 
         private static void StartRun()
         {
+            SfxPlayer.Play(Sfx.Button);
             SceneManager.LoadScene(GameSceneName);
         }
 

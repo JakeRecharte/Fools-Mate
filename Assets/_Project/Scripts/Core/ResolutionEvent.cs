@@ -18,6 +18,9 @@ namespace FoolsMate.Core
 
         /// <summary>The piece was taken off the board and nobody earns its points, e.g. a Bounce with no room.</summary>
         Died,
+
+        /// <summary>The piece replaced a pawn on its last rank. <see cref="ResolutionEvent.By"/> is the pawn.</summary>
+        Promoted,
     }
 
     /// <summary>
@@ -40,10 +43,10 @@ namespace FoolsMate.Core
         /// <summary>Damage taken. 0 for every kind except Damaged and Captured.</summary>
         public int Amount { get; }
 
-        /// <summary>The piece responsible, for Damaged and Captured. Null otherwise.</summary>
+        /// <summary>The piece responsible, for Damaged and Captured, or the pawn replaced, for Promoted. Null otherwise.</summary>
         public Piece By { get; }
 
-        /// <summary>The color of <see cref="By"/>, i.e. who earns the points. Null when there's no By.</summary>
+        /// <summary>The color of <see cref="By"/>, i.e. who earns the points. Null when nobody earns points.</summary>
         public PieceColor? ByColor { get; }
 
         private ResolutionEvent(ResolutionEventKind kind, Piece piece, PieceColor color, Cell from, Cell to,
@@ -93,6 +96,12 @@ namespace FoolsMate.Core
             return new ResolutionEvent(ResolutionEventKind.Died, piece, color, cell, cell, 0, null, null);
         }
 
+        public static ResolutionEvent Promoted(Piece piece, PieceColor color, Cell cell, Piece pawn)
+        {
+            return new ResolutionEvent(ResolutionEventKind.Promoted, piece, color, cell, cell, 0, RequireBy(pawn),
+                null);
+        }
+
         private static Piece RequireBy(Piece by)
         {
             return by ?? throw new ArgumentNullException(nameof(by));
@@ -110,6 +119,8 @@ namespace FoolsMate.Core
                     return $"{Color} {Piece} was captured by {ByColor} {By} at {To}";
                 case ResolutionEventKind.Bounced:
                     return $"{Color} {Piece} bounced {From} → {To}";
+                case ResolutionEventKind.Promoted:
+                    return $"{Color} {By} promoted to {Piece} at {To}";
                 default:
                     return $"{Color} {Piece} died at {To}";
             }

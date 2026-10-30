@@ -12,7 +12,8 @@ namespace FoolsMate.Game
     /// <summary>
     /// Turns mouse clicks into a turn plan. Left-click one of your pieces to see where it can go, then
     /// left-click a marked cell to plan that move. Click the selected piece again (or right-click any of your
-    /// pieces) to cancel its planned move.
+    /// pieces) to cancel its planned move. A pawn waiting to be promoted can't move; drag a piece from the Box
+    /// onto it instead.
     /// </summary>
     public class PlanningInput : MonoBehaviour
     {
@@ -26,11 +27,16 @@ namespace FoolsMate.Game
         private TurnPlan enemyPlan;
         private Piece selected;
         private List<Cell> selectedTargets = new List<Cell>();
+        private readonly List<Piece> waitingPawns = new List<Piece>();
+        private Piece dragged;
 
         /// <summary>This turn's plan. Read by <see cref="TurnController"/> when MOVE is pressed.</summary>
         public TurnPlan Plan { get; private set; }
 
-        /// <summary>Raised whenever a move is planned or cancelled.</summary>
+        /// <summary>Your pawns on their last rank that haven't been promoted yet. They die if MOVE is pressed.</summary>
+        public IReadOnlyList<Piece> WaitingPawns => waitingPawns;
+
+        /// <summary>Raised whenever a move is planned or cancelled, or a pawn is promoted.</summary>
         public event Action PlanChanged;
 
         /// <summary>
@@ -43,7 +49,13 @@ namespace FoolsMate.Game
             this.playerColor = playerColor;
             this.enemyPlan = enemyPlan;
             Plan = new TurnPlan(energy);
+            dragged = null;
             Deselect();
+
+            waitingPawns.Clear();
+            waitingPawns.AddRange(Promotion.GetWaitingPawns(board, playerColor));
+            ShowPromotions();
+
             RefreshPlan();
         }
 
@@ -51,7 +63,11 @@ namespace FoolsMate.Game
         public void End()
         {
             Deselect();
+            dragged = null;
+            boardView.CancelDrag();
             boardView.ClearPlan();
+            boardView.ClearPromotions();
+            waitingPawns.Clear();
             board = null;
         }
 
@@ -63,6 +79,13 @@ namespace FoolsMate.Game
                 return;
             }
 
+            // Handled before the UI check, so letting go over the HUD still ends the drag.
+            if (dragged != null)
+            {
+                UpdateDrag(mouse);
+                return;
+            }
+
             // Clicks on UI (like the MOVE button) shouldn't also land on the board underneath.
             if (EventSystem.current != null && EventSystem.current.IsPointerOverGameObject())
             {
@@ -71,6 +94,11 @@ namespace FoolsMate.Game
 
             if (mouse.leftButton.wasPressedThisFrame)
             {
+                if (TryStartDrag(mouse))
+                {
+                    return;
+                }
+
                 if (TryGetClickedCell(mouse, out Cell cell))
                 {
                     OnLeftClick(cell);
@@ -88,9 +116,72 @@ namespace FoolsMate.Game
 
         private bool TryGetClickedCell(Mouse mouse, out Cell cell)
         {
+            return boardView.TryWorldToCell(GetMouseWorld(mouse), out cell);
+        }
+
+        private static Vector3 GetMouseWorld(Mouse mouse)
+        {
             Vector3 world = Camera.main.ScreenToWorldPoint(mouse.position.ReadValue());
             world.z = 0f;
-            return boardView.TryWorldToCell(world, out cell);
+            return world;
+        }
+
+        /// <summary>Picks up a Box piece a pawn could promote to, but only while a pawn is waiting.</summary>
+        private bool TryStartDrag(Mouse mouse)
+        {
+            if (waitingPawns.Count == 0
+                || !boardView.TryGetBoxPiece(board, GetMouseWorld(mouse), out Piece piece)
+                || !Promotion.CanPromoteTo(piece.Type))
+            {
+                return false;
+            }
+
+            Deselect();
+            dragged = piece;
+            boardView.StartDrag(piece);
+            SfxPlayer.Play(Sfx.Select);
+            return true;
+        }
+
+        /// <summary>
+        /// Follows the mouse while the button is held. Letting go on a waiting pawn promotes it, for good; anywhere
+        /// else sends the piece back to its slot.
+        /// </summary>
+        private void UpdateDrag(Mouse mouse)
+        {
+            Vector3 world = GetMouseWorld(mouse);
+
+            if (mouse.leftButton.isPressed)
+            {
+                boardView.MoveDrag(world);
+                return;
+            }
+
+            Piece piece = dragged;
+            dragged = null;
+
+            Piece pawn = boardView.TryWorldToCell(world, out Cell cell) ? board.GetPieceAt(cell) : null;
+            if (pawn == null || !waitingPawns.Contains(pawn))
+            {
+                boardView.CancelDrag();
+                SfxPlayer.Play(Sfx.Cancel);
+                return;
+            }
+
+            ResolutionEvent promoted = Promotion.Promote(board, pawn, piece);
+            Debug.Log(promoted.ToString(), this);
+            waitingPawns.Remove(pawn);
+
+            // Redrawn so the piece leaves the Box at full size, and the pawn takes its slot.
+            boardView.ShowPieces(board);
+            ShowPromotions();
+            SfxPlayer.Play(Sfx.Plan);
+            RefreshPlan();
+        }
+
+        private void ShowPromotions()
+        {
+            boardView.ShowPromotions(waitingPawns.Select(pawn => board.GetCell(pawn)));
         }
 
         private void OnLeftClick(Cell cell)
@@ -112,13 +203,15 @@ namespace FoolsMate.Game
 
                 if (cancelled)
                 {
+                    SfxPlayer.Play(Sfx.Cancel);
                     RefreshPlan();
                 }
 
                 return;
             }
 
-            if (IsOwnPiece(piece))
+            // A waiting pawn has no moves; it's promoted by dragging onto it instead.
+            if (IsOwnPiece(piece) && !waitingPawns.Contains(piece))
             {
                 Select(piece, cell);
             }
@@ -133,6 +226,7 @@ namespace FoolsMate.Game
             Piece piece = board.GetPieceAt(cell);
             if (IsOwnPiece(piece) && Plan.Cancel(piece))
             {
+                SfxPlayer.Play(Sfx.Cancel);
                 Deselect();
                 RefreshPlan();
             }
@@ -145,9 +239,11 @@ namespace FoolsMate.Game
             if (!Plan.TryPlan(move))
             {
                 Debug.Log($"No energy left to plan {move}. Cancel a move with right-click first.", this);
+                SfxPlayer.Play(Sfx.Error);
                 return;
             }
 
+            SfxPlayer.Play(Sfx.Plan);
             Deselect();
             RefreshPlan();
         }
@@ -155,6 +251,7 @@ namespace FoolsMate.Game
         private void Select(Piece piece, Cell cell)
         {
             selected = piece;
+            SfxPlayer.Play(Sfx.Select);
 
             // The plan is passed in so sliding pieces can see past planned movers but stop where they land.
             // The enemy plan rules out cells its pieces are leaving.

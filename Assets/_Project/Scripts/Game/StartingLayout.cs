@@ -53,10 +53,7 @@ namespace FoolsMate.Game
                     }
 
                     PieceTypes.TryFromLetter(letter, out PieceType type);
-                    PieceDefinition definition = catalog.GetByType(type);
-
-                    var piece = new Piece(ids.Next(), definition.Key, definition.Type, definition.Stats);
-                    army.Add(piece, new Cell(file, rank));
+                    army.Add(catalog.CreatePiece(type, ids), new Cell(file, rank));
                 }
             }
 

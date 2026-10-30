@@ -133,6 +133,43 @@ namespace FoolsMate.Core
         }
 
         /// <summary>
+        /// Swaps a piece on the board for another, on the same cell and side. A replacement from that side's
+        /// removed pieces comes back at full Health, and the piece it replaces takes its place among the removed.
+        /// A brand-new replacement starts at full Health, and the piece it replaces is gone for good.
+        /// </summary>
+        public void Replace(Piece piece, Piece replacement)
+        {
+            PlacedPiece entry = Find(piece);
+
+            if (replacement == null)
+            {
+                throw new ArgumentNullException(nameof(replacement));
+            }
+
+            if (placed.ContainsKey(replacement.Id))
+            {
+                throw new InvalidOperationException($"{replacement} is already on the board at {placed[replacement.Id].Cell}.");
+            }
+
+            int removedIndex = removed.FindIndex(removedEntry => removedEntry.Piece.Id == replacement.Id);
+            if (removedIndex >= 0 && removed[removedIndex].Color != entry.Color)
+            {
+                throw new InvalidOperationException($"{replacement} belongs to {removed[removedIndex].Color}, not {entry.Color}.");
+            }
+
+            Cell cell = entry.Cell;
+            placed.Remove(piece.Id);
+            placed.Add(replacement.Id, new PlacedPiece(replacement, entry.Color, cell));
+            pieceIds[cell.File, cell.Rank] = replacement.Id;
+
+            // Same slot, so the rest of the Box doesn't shuffle along.
+            if (removedIndex >= 0)
+            {
+                removed[removedIndex] = entry;
+            }
+        }
+
+        /// <summary>
         /// One side's pieces taken off this round (captured or died), oldest first. Your side's go in the Box,
         /// the enemy's in the row above the board.
         /// </summary>

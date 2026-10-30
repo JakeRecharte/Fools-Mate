@@ -135,6 +135,8 @@ The 4-kill Tribute is a first guess to tune in playtesting.
 Piece stats:
 
 - Every piece has **Priority**, **Damage**, and **Health**.
+- **Health** is how much damage enemy pieces have to deal to capture the piece.
+- **Cracks** (later addition): each time a piece is captured, knocked off, or sacrificed, it gains a Crack. When it reaches its Crack limit it breaks and is removed from your army for good.
 - Points per capture (shop currency, not the Tribute) use official chess piece values to start:
 
 | Piece | Points | Priority | Damage | Health |
@@ -172,6 +174,26 @@ A shared event used by multiple mechanics (collisions, tiles, bosses, etc.):
 - "Within 2 tiles" is the 5x5 square around the cell the piece tried to enter (diagonals count, like a King's reach), not the cell it came from. The piece never lands back on that cell, even if it's empty (e.g. after a tied friendly collision).
 - Bounces happen after every other move has landed, so "unoccupied" means unoccupied on the final board.
 - If there is no unoccupied square within 2 tiles, the piece dies.
+
+**Pawn Promotion**
+
+- A pawn promotes when it's still on the last rank (the far side from where it started) after Move Resolution. Reaching it by a diagonal capture counts. A pawn that gets there but is captured or Bounced away in the same turn doesn't promote.
+- **Your pawns:**
+  - Promotion happens at the start of the next planning phase. The pawn's tile is highlighted, and the pawn has no moves, so it can't be selected for planning.
+  - You promote by dragging a piece from the Box onto the highlighted tile. It stays at Box size (16x16) while dragged and grows to full size (32x32) when dropped on the tile, replacing the pawn. Dropping it anywhere else sends it back to its slot.
+  - Pawns and Kings can't be picked, and neither can broken pieces (at their Crack limit, see Piece stats).
+  - The promoted piece comes back at full Health and keeps its upgrades and Cracks. Coming out of the Box doesn't remove the Crack it gained when it went in.
+  - The pawn takes the promoted piece's slot in the Box. It wasn't killed, so it doesn't gain a Crack, and it's back as a pawn next round.
+  - A drop is final. Undoing a promotion (dragging the piece back to the Box before MOVE) may come later.
+  - The promoted piece can be planned in the same phase it was placed. This is intended: the enemy telegraphed its moves against a pawn, so promoting earns a turn the enemy didn't plan for.
+  - Promoting is free. Moving the promoted piece costs Energy as usual.
+  - If more than one pawn reaches the last rank on the same turn, each tile is highlighted and takes one piece.
+- **Not promoting:**
+  - If MOVE is pressed while a pawn is still waiting, the pawn dies. It goes into the Box, gains a Crack, and counts as nobody's kill.
+  - If the Box has no piece that can be picked, the pawn dies the same way.
+  - Warning before it happens: the first MOVE press doesn't resolve the turn. WarningText says the pawn will die if it isn't promoted, the tile flashes, and the button changes to **MOVE ANYWAY**. A second press resolves the turn. Any change to the plan resets the button to MOVE.
+- If the round ends on the turn a pawn reaches the last rank, there's no promotion.
+- **Enemy pawns** promote right away during resolution, so the new piece is already on the board when you plan. For now the enemy picks a random piece (not a pawn or King), using the round's Random Seed. Later, each enemy will pick from a catalog of pieces that depends on the round. The enemy never promotes with pieces from your captured row, since that would undo your kills.
 
 **Enemy**
 
@@ -257,7 +279,10 @@ Repeat:
 - The 4 piece variants
 - More Kings
 - Piece storage bin: capacity, shop pricing, when swaps are allowed
-- Injury penalty for pieces that end a round in the Box
+- Injury penalty for pieces that end a round in the Box, and whether Cracks replace it
+- Cracks: the limit for each piece, and whether the shop can repair them
+- Idea: promoting could cost Energy
+- Enemy promotion catalog for each round
 - Which tile modifiers (if any) use placement B or C
 
 **Concerns**
