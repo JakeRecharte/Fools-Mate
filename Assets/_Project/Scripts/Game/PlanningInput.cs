@@ -112,6 +112,7 @@ namespace FoolsMate.Game
 
                 if (cancelled)
                 {
+                    SfxPlayer.Play(Sfx.Cancel);
                     RefreshPlan();
                 }
 
@@ -133,6 +134,7 @@ namespace FoolsMate.Game
             Piece piece = board.GetPieceAt(cell);
             if (IsOwnPiece(piece) && Plan.Cancel(piece))
             {
+                SfxPlayer.Play(Sfx.Cancel);
                 Deselect();
                 RefreshPlan();
             }
@@ -145,9 +147,11 @@ namespace FoolsMate.Game
             if (!Plan.TryPlan(move))
             {
                 Debug.Log($"No energy left to plan {move}. Cancel a move with right-click first.", this);
+                SfxPlayer.Play(Sfx.Error);
                 return;
             }
 
+            SfxPlayer.Play(Sfx.Plan);
             Deselect();
             RefreshPlan();
         }
@@ -155,6 +159,7 @@ namespace FoolsMate.Game
         private void Select(Piece piece, Cell cell)
         {
             selected = piece;
+            SfxPlayer.Play(Sfx.Select);
 
             // The plan is passed in so sliding pieces can see past planned movers but stop where they land.
             // The enemy plan rules out cells its pieces are leaving.

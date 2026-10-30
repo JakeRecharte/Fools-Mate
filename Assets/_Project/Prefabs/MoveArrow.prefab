@@ -46,9 +46,9 @@ MonoBehaviour:
   m_EditorClassIdentifier: FoolsMate.Game::FoolsMate.Game.MoveArrow
   ends:
   - {fileID: -7539635771174228138, guid: df3a584d558e1404c86f279666d4205c, type: 3}
+  - {fileID: 5682696617304840305, guid: df3a584d558e1404c86f279666d4205c, type: 3}
   - {fileID: 3524638812546828276, guid: df3a584d558e1404c86f279666d4205c, type: 3}
-  - {fileID: 188504712096398801, guid: df3a584d558e1404c86f279666d4205c, type: 3}
-  - {fileID: -2020665150476298519, guid: df3a584d558e1404c86f279666d4205c, type: 3}
+  - {fileID: -8534344536314005298, guid: df3a584d558e1404c86f279666d4205c, type: 3}
   middles:
   - {fileID: 2423494777519112769, guid: 9e77fcdb9684146b58762c7f76867d4b, type: 3}
   - {fileID: -5098418240812577421, guid: 9e77fcdb9684146b58762c7f76867d4b, type: 3}

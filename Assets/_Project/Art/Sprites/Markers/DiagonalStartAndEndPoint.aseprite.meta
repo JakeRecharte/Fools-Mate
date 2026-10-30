@@ -148,7 +148,7 @@ ScriptedImporter:
     uvTransform: {x: 4, y: 4}
   - name: DiagonalEnd_DownRight
     originalName: 
-    pivot: {x: 0.3809524, y: 4}
+    pivot: {x: 0.3809524, y: 2.2857144}
     alignment: 9
     border: {x: 0, y: 0, z: 0, w: 0}
     customData: 
@@ -157,7 +157,7 @@ ScriptedImporter:
       x: 37
       y: 4
       width: 21
-      height: 4
+      height: 7
     spriteID: 6bd350f23db544c1c86efbdf8a97fb03
     spriteBone: []
     spriteOutline: []
@@ -190,16 +190,16 @@ ScriptedImporter:
     uvTransform: {x: 4, y: 39}
   - name: DiagonalEnd_DownLeft
     originalName: 
-    pivot: {x: 0.61904764, y: 4}
+    pivot: {x: 0.61904764, y: 2.2857144}
     alignment: 9
     border: {x: 0, y: 0, z: 0, w: 0}
     customData: 
     rect:
       serializedVersion: 2
       x: 37
-      y: 16
+      y: 19
       width: 21
-      height: 4
+      height: 7
     spriteID: 13da8b78d818447a5b548f0a09920b22
     spriteBone: []
     spriteOutline: []
@@ -208,7 +208,7 @@ ScriptedImporter:
     indices: 
     edges: []
     tessellationDetail: 0
-    uvTransform: {x: 37, y: 16}
+    uvTransform: {x: 37, y: 19}
   spriteSheetImportData: []
   tileSetImportData: []
   asepriteLayers:
@@ -240,7 +240,7 @@ ScriptedImporter:
         x: 8
         y: 0
         width: 21
-        height: 4
+        height: 7
       spriteId: 6bd350f23db544c1c86efbdf8a97fb03
     - name: Frame_2
       frameIndex: 2
@@ -258,7 +258,7 @@ ScriptedImporter:
         x: 3
         y: 0
         width: 21
-        height: 4
+        height: 7
       spriteId: 13da8b78d818447a5b548f0a09920b22
     linkedCells: []
     tileCells: []

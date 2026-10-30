@@ -86,6 +86,11 @@ namespace FoolsMate.Game
             {
                 hud.ShowOutcome(score.Outcome);
             }
+
+            if (score.Outcome == RoundOutcome.OutOfTurns || score.Outcome == RoundOutcome.KingLost)
+            {
+                SfxPlayer.Play(Sfx.Lose);
+            }
         }
 
         private void RefreshHud()
@@ -148,8 +153,11 @@ namespace FoolsMate.Game
             if (problems.Count > 0)
             {
                 ShowWarnings(problems.Select(problem => problem.Message));
+                SfxPlayer.Play(Sfx.Error);
                 return;
             }
+
+            SfxPlayer.Play(Sfx.Move);
 
             // Logged before ApplyTurn, which moves the turn counter on.
             List<ResolutionEvent> events = MoveResolver.Resolve(board, plan, enemyPlan, random);
