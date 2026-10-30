@@ -6,8 +6,8 @@ namespace FoolsMate.Game
     /// <summary>
     /// Draws a planned move as a track of one sprite per cell: an end piece under the moving piece, middle
     /// pieces on the cells it passes, a bend on a knight's corner, and an end piece on the destination
-    /// pointing back the way it came (a knight has its own end pieces, to line up with the bend). Lives on a
-    /// prefab so the look (and later, animation) can change without touching <see cref="BoardView"/>.
+    /// pointing back the way it came. Lives on a prefab so the look (and later, animation) can change without
+    /// touching <see cref="BoardView"/>.
     /// </summary>
     public class MoveArrow : MonoBehaviour
     {
@@ -25,13 +25,6 @@ namespace FoolsMate.Game
             new Vector2Int(1, -1), new Vector2Int(1, 1), new Vector2Int(-1, 1), new Vector2Int(-1, -1),
         };
 
-        // Knight end frames by the knight's turning step: UpAndDownLeft, UpAndDownRight, RightAndLeftUp,
-        // RightAndLeftDown.
-        private static readonly Vector2Int[] KnightTurns =
-        {
-            new Vector2Int(-1, 0), new Vector2Int(1, 0), new Vector2Int(0, 1), new Vector2Int(0, -1),
-        };
-
         [Tooltip("StartAndEndPoints frames in order: Up, UpRight, Right, DownRight, Down, DownLeft, Left, UpLeft.")]
         [ElementNames("Up", "UpRight", "Right", "DownRight", "Down", "DownLeft", "Left", "UpLeft")]
         [SerializeField] private Sprite[] ends = new Sprite[8];
@@ -44,10 +37,6 @@ namespace FoolsMate.Game
         [ElementNames("UpRight (bottom + right)", "DownRight (top + right)", "DownLeft (top + left)",
             "UpLeft (bottom + left)")]
         [SerializeField] private Sprite[] bends = new Sprite[4];
-
-        [Tooltip("KnightEndPoints frames in order: UpAndDownLeft, UpAndDownRight, RightAndLeftUp, RightAndLeftDown.")]
-        [ElementNames("UpAndDownLeft", "UpAndDownRight", "RightAndLeftUp", "RightAndLeftDown")]
-        [SerializeField] private Sprite[] knightEnds = new Sprite[4];
 
         [Tooltip("Sorting layer for the track. Should be below Pieces so the start piece sits under the mover.")]
         [SerializeField] private string sortingLayer = "Arrows";
@@ -96,7 +85,7 @@ namespace FoolsMate.Game
             int bend = Array.IndexOf(BendCorners, -longStep + shortStep);
             AddSprite(bends[bend], corner, color, cellToWorld);
 
-            AddSprite(knightEnds[Array.IndexOf(KnightTurns, shortStep)], corner + shortStep, color, cellToWorld);
+            AddPart(ends, -shortStep, corner + shortStep, color, cellToWorld);
         }
 
         private void AddPart(Sprite[] sprites, Vector2Int direction, Vector2Int cell, Color color,
