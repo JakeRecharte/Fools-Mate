@@ -2,27 +2,45 @@ using FoolsMate.Core;
 using TMPro;
 using UnityEngine;
 using UnityEngine.SceneManagement;
+using UnityEngine.Serialization;
 using UnityEngine.UI;
 
 namespace FoolsMate.Game
 {
     /// <summary>
-    /// Shows the round's progress (Tribute, points, turn) and the Round Over panel. Updated by
+    /// Shows the round's progress (round, Tribute, points, turn) and the Round Over panel. Updated by
     /// <see cref="TurnController"/>.
     /// </summary>
     public class RoundHud : MonoBehaviour
     {
+        [Tooltip("Optional. Shows which round of the run this is.")]
+        [SerializeField] private TMP_Text roundText;
+
         [SerializeField] private TMP_Text tributeText;
         [SerializeField] private TMP_Text pointsText;
         [SerializeField] private TMP_Text turnText;
 
         [SerializeField] private GameObject roundOverPanel;
         [SerializeField] private TMP_Text outcomeText;
-        [SerializeField] private Button playAgainButton;
 
-        /// <summary>Shows the current kills, points, and the turn being planned.</summary>
+        [Tooltip("Next Round after a won round, Play Again after a loss or a won game.")]
+        [FormerlySerializedAs("playAgainButton")]
+        [SerializeField] private Button continueButton;
+
+        [Tooltip("Optional. The Continue Button's label, so it can switch between Next Round and Play Again.")]
+        [SerializeField] private TMP_Text continueLabel;
+
+        /// <summary>What the Continue Button does, set when the panel opens.</summary>
+        private bool advanceOnContinue;
+
+        /// <summary>Shows the current round, kills, points, and the turn being planned.</summary>
         public void Refresh(RoundScore score)
         {
+            if (roundText != null && Run.Current != null)
+            {
+                roundText.text = $"Round {Run.Current.Round}/{RunProgress.RoundCount}";
+            }
+
             if (tributeText != null)
             {
                 tributeText.text = $"Tribute {score.Kills}/{score.Tribute}";
@@ -41,11 +59,33 @@ namespace FoolsMate.Game
             }
         }
 
-        public void ShowOutcome(RoundOutcome outcome)
+        public void ShowOutcome(RoundOutcome outcome, RunProgress run)
         {
+            bool won = TurnController.IsWin(outcome);
+            advanceOnContinue = won && !run.IsFinalRound;
+
+            string result;
+            if (!won)
+            {
+                result = $"You made it to round {run.Round}.";
+            }
+            else if (run.IsFinalRound)
+            {
+                result = "You won the game!";
+            }
+            else
+            {
+                result = $"You won round {run.Round}!";
+            }
+
             if (outcomeText != null)
             {
-                outcomeText.text = TurnController.DescribeOutcome(outcome);
+                outcomeText.text = $"{TurnController.DescribeOutcome(outcome)}\n{result}";
+            }
+
+            if (continueLabel != null)
+            {
+                continueLabel.text = advanceOnContinue ? "Next Round" : "Play Again";
             }
 
             if (roundOverPanel != null)
@@ -67,20 +107,30 @@ namespace FoolsMate.Game
             // Hidden here too, so the panel can't cover the board if it was left ticked in the scene.
             Hide();
 
-            if (playAgainButton == null)
+            if (continueButton == null)
             {
-                Debug.LogError("RoundHud: Play Again Button isn't assigned.", this);
+                Debug.LogError("RoundHud: Continue Button isn't assigned.", this);
                 return;
             }
 
-            playAgainButton.onClick.AddListener(PlayAgain);
+            continueButton.onClick.AddListener(Continue);
         }
 
-        private static void PlayAgain()
+        private void Continue()
         {
             SfxPlayer.Play(Sfx.Button);
 
-            // A fresh load reruns RoundSetup, so the new round gets a new color and seed with nothing to reset.
+            if (advanceOnContinue)
+            {
+                Run.Current.Advance();
+            }
+            else
+            {
+                // A loss or a won game ends the run, so Play Again starts over from round 1.
+                Run.StartNew();
+            }
+
+            // A fresh load reruns RoundSetup, which reads the round's turn limit from the run.
             SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex);
         }
     }

@@ -37,10 +37,6 @@ namespace FoolsMate.Game
         [Min(1)]
         [SerializeField] private int tribute = 4;
 
-        [Tooltip("Turns to pay the Tribute before losing a life. Level 1 is 5.")]
-        [Min(1)]
-        [SerializeField] private int turnLimit = 5;
-
         [Tooltip("0 picks a new seed each round. Set a number to replay the same Bounces while testing.")]
         [SerializeField] private int randomSeed;
 
@@ -52,6 +48,14 @@ namespace FoolsMate.Game
             {
                 return;
             }
+
+            // Pressing Play straight from the Game scene skips the menu, so start the run here.
+            if (Run.Current == null)
+            {
+                Run.StartNew();
+            }
+
+            RunProgress run = Run.Current;
 
             // One ID source for both armies so no two pieces share an ID.
             var ids = new PieceIdSource();
@@ -66,9 +70,10 @@ namespace FoolsMate.Game
 
             // Core rules use System.Random, since Core can't see Unity. Logged so a strange round can be replayed.
             int seed = randomSeed != 0 ? randomSeed : Random.Range(1, int.MaxValue);
-            Debug.Log($"Round start: player is {rolledColor}, seed {seed}.", this);
+            Debug.Log($"Round {run.Round}/{RunProgress.RoundCount} start: player is {rolledColor}, " +
+                $"{run.TurnLimit} turns, seed {seed}.", this);
 
-            var score = new RoundScore(rolledColor, tribute, turnLimit);
+            var score = new RoundScore(rolledColor, tribute, run.TurnLimit);
 
             boardView.Show(board, rolledColor);
 

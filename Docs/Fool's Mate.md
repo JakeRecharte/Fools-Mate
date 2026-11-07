@@ -67,6 +67,22 @@ Run structure:
   4. Grandmaster (GM)
 - Boss twists: guarded fortress, fog of war, the board itself (hazard tiles, see Tiles), 4th TBD.
 
+Current build (for now, until tiers, the shop, and lives are in):
+
+- A run is 4 rounds. The turn limit starts at 10 and drops by 2 each round:
+
+| Round | Turn limit |
+|---|---|
+| 1 | 10 |
+| 2 | 8 |
+| 3 | 6 |
+| 4 | 4 |
+
+- Winning rounds 1-3 shows "You won round N!" with a Next Round button.
+- Winning round 4 wins the game.
+- Losing any round ends the run and shows which round you reached.
+- Fewer turns is the only difficulty ramp for now. More ramping comes later.
+
 Kings:
 
 | King | Lives | Starting board |
@@ -128,9 +144,9 @@ Level 1 (playtest target, tune this first):
 
 | Tribute | Turn limit | Energy per turn |
 |---|---|---|
-| 4 kills | 5 turns | 2 |
+| 4 kills | 10 turns | 2 |
 
-The 4-kill Tribute is a first guess to tune in playtesting.
+The 4-kill Tribute is a first guess to tune in playtesting. The turn limit then drops by 2 each round (see Current build under Run structure).
 
 Piece stats:
 
